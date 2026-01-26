@@ -1,66 +1,64 @@
-name: CI & Release
+name: Release
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  # Build & test
-  test:
+  ci:
+    name: CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "lts/*"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build all packages
+      - name: Build
         run: pnpm build
 
-      - name: Run tests
+      - name: Test
         run: pnpm test
 
       - name: Type check
         run: pnpm turbo typecheck
 
-  # Release with OIDC Trusted Publisher (on main only)
   release:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: test
+    name: Release
+    needs: ci
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       id-token: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "lts/*"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -83,19 +81,20 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           # Run changeset version (bumps version, updates CHANGELOG, removes changesets)
-          pnpm changeset version
+          pnpm run version
 
           # Commit the version bump
           git add -A
-          git commit -m "chore: release packages" || echo "No changes to commit"
+          git commit -m "chore: release" || echo "No changes to commit"
           git push
 
           # Build and publish
-          pnpm build
-          pnpm changeset publish
+          pnpm run build
+          pnpm exec changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+          HUSKY: 0
 
       - name: Create GitHub Releases
         if: steps.check.outputs.has_changesets == 'true'
@@ -107,8 +106,10 @@ jobs:
               VERSION=$(node -p "require('./$pkg/package.json').version")
               TAG="$NAME@$VERSION"
 
-              # Check if tag exists
+              # changeset publish creates tags, push them
               if git rev-parse "$TAG" >/dev/null 2>&1; then
+                git push origin "$TAG" 2>/dev/null || true
+
                 # Create GitHub release if it doesn't exist
                 if ! gh release view "$TAG" >/dev/null 2>&1; then
                   gh release create "$TAG" \
@@ -121,14 +122,36 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUSKY: 0
 
-      # If no changesets: check if there are unpublished versions and publish via changeset
+      # If no changesets but unpublished version: publish (handles manual version bumps)
       - name: Publish if unpublished
         if: steps.check.outputs.has_changesets == 'false'
         run: |
-          pnpm build
-          # Use changeset publish which handles OIDC auth properly
-          pnpm changeset publish
+          NEEDS_PUBLISH=false
+
+          # Check each package
+          for pkg in packages/conform packages/drift; do
+            if [ -f "$pkg/package.json" ]; then
+              NAME=$(node -p "require('./$pkg/package.json').name")
+              VERSION=$(node -p "require('./$pkg/package.json').version")
+              NPM_VERSION=$(npm view "$NAME" version 2>/dev/null || echo "0.0.0")
+
+              if [ "$VERSION" != "$NPM_VERSION" ]; then
+                echo "$NAME@$VERSION needs publishing (npm has $NPM_VERSION)"
+                NEEDS_PUBLISH=true
+              else
+                echo "$NAME@$VERSION already published"
+              fi
+            fi
+          done
+
+          if [ "$NEEDS_PUBLISH" = "true" ]; then
+            echo "Publishing unpublished versions..."
+            pnpm run build
+            pnpm exec changeset publish
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+          HUSKY: 0
