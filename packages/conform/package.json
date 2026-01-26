@@ -1,0 +1,18 @@
+{
+  "name": "@standards-kit/conform",
+  "version": "0.0.1",
+  "description": "Standards conformance checking",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src",
+    "test": "echo 'no tests yet'"
+  },
+  "dependencies": {
+    "@standards-kit/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
