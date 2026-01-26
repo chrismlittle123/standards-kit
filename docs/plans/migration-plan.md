@@ -16,3 +16,4 @@ Based on our conversation:
 - `standards-kit` → the repo/SDK (public npm package)
 - `conform-cli` → the in-repo CLI
 - `drift-cli` → the org-scanning CLI
+- `standards-core` → shared types/config parsing (internal, not published)
