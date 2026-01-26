@@ -195,66 +195,68 @@ jobs:
 
 ## Migration Phases
 
-### Phase 1: Monorepo Setup
-- [ ] Set up standards-kit monorepo structure
-- [ ] Configure pnpm workspaces
-- [ ] Configure Turbo for build orchestration
-- [ ] Set up base tsconfig.json
-- [ ] Create package scaffolds (core, conform, drift)
+### Phase 1: Monorepo Setup ✅
+- [x] Set up standards-kit monorepo structure
+- [x] Configure pnpm workspaces
+- [x] Configure Turbo for build orchestration
+- [x] Set up base tsconfig.json
+- [x] Create package scaffolds (core, conform, drift)
 
-### Phase 2: Extract Core
-- [ ] Identify shared types from check-my-toolkit
-- [ ] Extract Zod schemas to core
-- [ ] Extract TOML loader to core
-- [ ] Extract registry resolution to core
-- [ ] Write unit tests for core
+### Phase 2: Extract Core ✅
+- [x] Identify shared types from check-my-toolkit
+- [x] Extract Zod schemas to core
+- [x] Extract TOML loader to core
+- [x] Extract registry resolution to core
+- [x] Write unit tests for core
 
-### Phase 3: Migrate Conform
-- [ ] Copy check-my-toolkit src to packages/conform
-- [ ] Update imports to use @standards-kit/core
-- [ ] Rename check.toml references to standards.toml
-- [ ] Rename CLI from `cm` to `conform`
-- [ ] Update all internal references
-- [ ] Migrate unit tests
-- [ ] Migrate e2e tests
+### Phase 3: Migrate Conform ✅
+- [x] Copy check-my-toolkit src to packages/conform
+- [x] Update imports to use @standards-kit/core
+- [x] Rename check.toml references to standards.toml
+- [x] Rename CLI from `cm` to `conform`
+- [x] Update all internal references
+- [x] Migrate unit tests
+- [x] Migrate e2e tests
 
-### Phase 4: Migrate Drift
-- [ ] Copy drift-toolkit src to packages/drift
-- [ ] Update imports to use @standards-kit/core
-- [ ] Update references to check.toml → standards.toml
-- [ ] Update dependency on check-my-toolkit → @standards-kit/conform
-- [ ] Migrate unit tests
+### Phase 4: Migrate Drift ✅
+- [x] Copy drift-toolkit src to packages/drift
+- [x] Update imports to use @standards-kit/core
+- [x] Update references to check.toml → standards.toml
+- [x] Update dependency on check-my-toolkit → @standards-kit/conform
+- [x] Migrate unit tests
 
-### Phase 5: GitHub Workflows
-- [ ] Create unified ci-release.yml workflow
-- [ ] Configure path-based filtering for selective builds
-- [ ] Set up OIDC-based npm publishing
-- [ ] Configure changeset automation
-- [ ] Remove redundant workflow files
+### Phase 5: GitHub Workflows ✅
+- [x] Create unified ci-release.yml workflow
+- [x] Configure path-based filtering for selective builds
+- [x] Set up OIDC-based npm publishing
+- [x] Configure changeset automation
+- [x] Remove redundant workflow files
 
-### Phase 6: Documentation
-- [ ] Update all README files
-- [ ] Create migration guide for existing users
-- [ ] Update registry references in docs
-- [ ] Document new package structure
+### Phase 6: Documentation ✅
+- [x] Update all README files
+- [x] Create migration guide for existing users
+- [x] Update registry references in docs
+- [x] Document new package structure
 
-### Phase 7: Registry Updates
-- [ ] Rename check-my-toolkit-registry-community → standards-community
-- [ ] Rename check-my-toolkit-registry-private → standards-private
-- [ ] Update all registry references in rulesets
+### Phase 7: Registry Updates (External)
+- [ ] Rename check-my-toolkit-registry-community → standards-community (external GitHub repo)
+- [ ] Rename check-my-toolkit-registry-private → standards-private (external GitHub repo)
+- [ ] Update all registry references in rulesets (in registry repos)
 
-### Phase 8: Testing & Validation
-- [ ] Run full test suite
-- [ ] Test conform CLI end-to-end
-- [ ] Test drift CLI end-to-end
-- [ ] Validate MCP server functionality
-- [ ] Test monorepo detection
+> **Note:** Phase 7 involves renaming external GitHub repositories. The codebase uses dynamic registry URLs (`github:owner/repo`), so no code changes are needed here.
 
-### Phase 9: Initial Release
-- [ ] Publish @standards-kit/conform@0.1.0
-- [ ] Publish @standards-kit/drift@0.1.0
-- [ ] Verify npm packages work correctly
-- [ ] Create GitHub release
+### Phase 8: Testing & Validation ✅
+- [x] Run full test suite (342 tests passed)
+- [x] Test conform CLI end-to-end
+- [x] Test drift CLI end-to-end
+- [x] Validate MCP server functionality
+- [x] Test monorepo detection
+
+### Phase 9: Initial Release ✅
+- [x] Publish @standards-kit/conform@0.1.3
+- [x] Publish @standards-kit/drift@0.1.3
+- [x] Verify npm packages work correctly
+- [x] Create GitHub release
 
 ### Phase 10: Post-Release (Future)
 - [ ] Deprecate check-my-toolkit npm package
