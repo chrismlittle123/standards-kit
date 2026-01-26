@@ -1,5 +1,13 @@
 # @standards-kit/drift
 
+## 0.1.3
+
+### Patch Changes
+
+- fbefc47: Fix release workflow to use OIDC trusted publisher for npm authentication
+- Updated dependencies [fbefc47]
+  - @standards-kit/conform@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

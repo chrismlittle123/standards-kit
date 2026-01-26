@@ -1,6 +1,6 @@
 {
   "name": "@standards-kit/conform",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Standards conformance checking - in-repo enforcement CLI",
   "type": "module",
   "main": "dist/index.js",
