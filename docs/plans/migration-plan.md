@@ -13,7 +13,6 @@ Based on our conversation:
 
 ## Package Names
 
-- `@yourco/standards-kit` → the repo/SDK name (maybe just for documentation, not a published package itself)
-- `@yourco/conform` → the in-repo CLI
-- `@yourco/drift` → the org-scanning CLI
-- `@yourco/standards-core` → shared types/config parsing (if needed)
+- `standards-kit` → the repo/SDK (public npm package)
+- `conform-cli` → the in-repo CLI
+- `drift-cli` → the org-scanning CLI
