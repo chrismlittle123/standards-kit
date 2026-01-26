@@ -1,18 +1,98 @@
 {
   "name": "@standards-kit/conform",
-  "version": "0.0.1",
-  "description": "Standards conformance checking",
+  "version": "0.1.0",
+  "description": "Standards conformance checking - in-repo enforcement CLI",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "conform": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc",
-    "lint": "eslint src",
-    "test": "echo 'no tests yet'"
+    "build": "tsup && tsc --emitDeclarationOnly",
+    "dev": "tsup --watch",
+    "start": "node dist/cli.js",
+    "test": "echo 'No tests yet' && exit 0",
+    "test:unit": "vitest run tests/unit/",
+    "test:watch": "vitest tests/unit/",
+    "test:coverage": "vitest run tests/unit/ --coverage",
+    "test:e2e": "vitest run tests/e2e/",
+    "test:all": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "keywords": [
+    "linting",
+    "code-quality",
+    "standards",
+    "process",
+    "ci",
+    "cli"
+  ],
+  "author": "Chris Little",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrismlittle123/standards-kit.git",
+    "directory": "packages/conform"
+  },
+  "bugs": {
+    "url": "https://github.com/chrismlittle123/standards-kit/issues"
+  },
+  "homepage": "https://github.com/chrismlittle123/standards-kit/tree/main/packages/conform#readme",
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "@standards-kit/core": "workspace:*"
+    "@aws-sdk/client-cloudwatch-logs": "^3.974.0",
+    "@aws-sdk/client-dynamodb": "^3.974.0",
+    "@aws-sdk/client-ec2": "^3.975.0",
+    "@aws-sdk/client-ecs": "^3.975.0",
+    "@aws-sdk/client-elastic-load-balancing-v2": "^3.975.0",
+    "@aws-sdk/client-elasticache": "^3.975.0",
+    "@aws-sdk/client-iam": "^3.974.0",
+    "@aws-sdk/client-lambda": "^3.974.0",
+    "@aws-sdk/client-rds": "^3.975.0",
+    "@aws-sdk/client-s3": "^3.967.0",
+    "@aws-sdk/client-secrets-manager": "^3.974.0",
+    "@aws-sdk/client-sns": "^3.974.0",
+    "@aws-sdk/client-sqs": "^3.974.0",
+    "@google-cloud/artifact-registry": "^4.6.0",
+    "@google-cloud/run": "^3.1.0",
+    "@google-cloud/secret-manager": "^6.1.1",
+    "@iarna/toml": "^2.2.5",
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "chalk": "^5.6.2",
+    "commander": "^13.0.0",
+    "execa": "^9.6.1",
+    "glob": "^13.0.0",
+    "google-auth-library": "^10.5.0",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.1",
+    "minimatch": "^10.1.1",
+    "zod": "^3.24.1",
+    "zod-to-json-schema": "^3.25.1"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.9",
+    "aws-sdk-client-mock": "^4.1.0",
+    "dts-bundle-generator": "^9.5.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.8"
   }
 }

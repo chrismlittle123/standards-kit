@@ -7,9 +7,13 @@
   "scripts": {
     "build": "turbo build",
     "lint": "turbo lint",
-    "test": "turbo test"
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "turbo": "^2.0.0",
     "typescript": "^5.4.0"
   },
