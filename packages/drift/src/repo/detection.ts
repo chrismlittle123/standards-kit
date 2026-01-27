@@ -1,4 +1,4 @@
-/** Repository detection utilities for drift-toolkit. */
+/** Repository detection utilities for @standards-kit/drift. */
 import { existsSync, readFileSync, readdirSync } from "fs";
 import { join, relative } from "path";
 import { parse as parseToml } from "smol-toml";

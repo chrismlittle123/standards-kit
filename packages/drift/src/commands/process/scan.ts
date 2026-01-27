@@ -29,7 +29,7 @@ export interface ProcessScanOptions {
 }
 
 /**
- * Map @standards-kit/conform ValidateProcessResult to drift-toolkit ProcessViolationsDetection
+ * Map @standards-kit/conform ValidateProcessResult to @standards-kit/drift ProcessViolationsDetection
  */
 function mapToDetection(
   result: ValidateProcessResult,
@@ -201,7 +201,7 @@ async function scanSingleRepo(
     config,
   });
 
-  // Map to drift-toolkit detection format
+  // Map to @standards-kit/drift detection format
   const detection = mapToDetection(result, repo);
 
   // Output results

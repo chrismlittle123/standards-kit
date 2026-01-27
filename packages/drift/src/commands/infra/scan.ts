@@ -42,7 +42,7 @@ export interface InfraScanCommandOptions {
 }
 
 /**
- * Map @standards-kit/conform InfraScanResult to drift-toolkit InfraDriftDetection
+ * Map @standards-kit/conform InfraScanResult to @standards-kit/drift InfraDriftDetection
  */
 function mapToDetection(
   result: InfraScanResult,
@@ -247,7 +247,7 @@ async function scanSingleRepo(
 
     const result = await scanInfra(scanOptions);
 
-    // Map to drift-toolkit detection format
+    // Map to @standards-kit/drift detection format
     const detection = mapToDetection(result, repo);
 
     // Output results

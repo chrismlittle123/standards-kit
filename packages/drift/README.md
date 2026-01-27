@@ -127,14 +127,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-## Migration from drift-toolkit
-
-See the [Migration Guide](../../docs/migration.md) for details on migrating from `drift-toolkit`.
-
-Key changes:
-- Package name: `drift-toolkit` -> `@standards-kit/drift`
-- Config references: `check.toml` -> `standards.toml`
-
 ## License
 
 MIT

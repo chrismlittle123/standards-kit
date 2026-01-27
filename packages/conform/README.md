@@ -129,15 +129,6 @@ conform mcp
 | 2 | Configuration error |
 | 3 | Runtime error |
 
-## Migration from check-my-toolkit
-
-See the [Migration Guide](../../docs/migration.md) for details on migrating from `check-my-toolkit`.
-
-Key changes:
-- Config file: `check.toml` -> `standards.toml`
-- CLI command: `cm` -> `conform`
-- Package name: `check-my-toolkit` -> `@standards-kit/conform`
-
 ## License
 
 MIT

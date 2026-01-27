@@ -29,7 +29,7 @@ function truncateBody(body: string): string {
   }
   return (
     body.slice(0, GITHUB_ISSUES.maxBodyLength - 100) +
-    "\n\n... (truncated)\n\n---\n_Created by drift-toolkit_"
+    "\n\n... (truncated)\n\n---\n_Created by @standards-kit/drift_"
   );
 }
 
@@ -88,7 +88,7 @@ export function formatMissingProjectsIssueBody(
   parts.push("3. Close this issue once standards are applied\n");
 
   // Footer
-  parts.push("---\n_Created by drift-toolkit_");
+  parts.push("---\n_Created by @standards-kit/drift_");
 
   let body = parts.join("\n");
 
@@ -96,7 +96,7 @@ export function formatMissingProjectsIssueBody(
   if (body.length > GITHUB_ISSUES.maxBodyLength) {
     body =
       body.slice(0, GITHUB_ISSUES.maxBodyLength - 100) +
-      "\n\n... (content truncated due to length)\n\n---\n_Created by drift-toolkit_";
+      "\n\n... (content truncated due to length)\n\n---\n_Created by @standards-kit/drift_";
   }
 
   return body;
@@ -143,7 +143,7 @@ export function formatTierMismatchIssueBody(
     `1. Update \`standards.toml\` to use a ruleset matching \`${detection.expectedPattern}\``,
     "2. Or update `standards.toml` `[metadata].tier` if the current rulesets are correct",
     "3. Close this issue once the mismatch is resolved\n",
-    "---\n_Created by drift-toolkit_",
+    "---\n_Created by @standards-kit/drift_",
   ];
   return truncateBody(parts.join("\n"));
 }
@@ -209,7 +209,7 @@ export function formatDependencyChangesIssueBody(
     "### Action Required\n",
     "Review these dependency file changes and close this issue once investigated.",
     "These files affect how code standards are enforced in this repository.\n",
-    "---\n_Created by drift-toolkit_",
+    "---\n_Created by @standards-kit/drift_",
   ];
   return truncateBody(parts.join("\n"));
 }

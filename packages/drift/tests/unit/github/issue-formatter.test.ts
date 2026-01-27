@@ -34,7 +34,7 @@ describe("issue-formatter", () => {
       expect(body).toContain("| packages/api | typescript |");
       expect(body).toContain("Action Required");
       expect(body).toContain("`cm init`");
-      expect(body).toContain("Created by drift-toolkit");
+      expect(body).toContain("Created by @standards-kit/drift");
     });
 
     it("handles multiple missing projects", () => {
@@ -83,7 +83,7 @@ describe("issue-formatter", () => {
 
       expect(body.length).toBeLessThanOrEqual(60000);
       expect(body).toContain("(content truncated due to length)");
-      expect(body).toContain("Created by drift-toolkit");
+      expect(body).toContain("Created by @standards-kit/drift");
     });
 
     it("includes table headers", () => {
@@ -138,7 +138,7 @@ describe("issue-formatter", () => {
       );
       expect(body).toContain("No ruleset matching pattern");
       expect(body).toContain("Action Required");
-      expect(body).toContain("Created by drift-toolkit");
+      expect(body).toContain("Created by @standards-kit/drift");
     });
 
     it("handles multiple rulesets", () => {
@@ -245,7 +245,7 @@ describe("issue-formatter", () => {
       expect(body).toContain('- "warn"');
       expect(body).toContain('+ "off"');
       expect(body).toContain("Action Required");
-      expect(body).toContain("Created by drift-toolkit");
+      expect(body).toContain("Created by @standards-kit/drift");
     });
 
     it("groups changes by check type", () => {

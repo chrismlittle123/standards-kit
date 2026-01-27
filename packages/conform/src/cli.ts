@@ -118,7 +118,7 @@ program.addCommand(createProcessCommand(VERSION));
 // conform dependencies - list config files tracked by enabled checks
 program
   .command("dependencies")
-  .description("List config files tracked by enabled checks (for drift-toolkit)")
+  .description("List config files tracked by enabled checks (for @standards-kit/drift)")
   .option("-c, --config <path>", "Path to standards.toml config file")
   .addOption(
     new Option("-f, --format <format>", "Output format").choices(["text", "json"]).default("text")

@@ -16,7 +16,7 @@ function truncateBody(body: string): string {
   }
   return (
     body.slice(0, GITHUB_ISSUES.maxBodyLength - 100) +
-    "\n\n... (truncated)\n\n---\n_Created by drift-toolkit_"
+    "\n\n... (truncated)\n\n---\n_Created by @standards-kit/drift_"
   );
 }
 
@@ -113,7 +113,7 @@ function formatHowToFix(): string[] {
     "3. **CI checks**: Ensure required status checks are configured",
     "4. **Repository settings**: Update visibility, security settings as needed\n",
     "Close this issue once all violations are resolved.\n",
-    "---\n_Created by drift-toolkit_",
+    "---\n_Created by @standards-kit/drift_",
   ];
 }
 
