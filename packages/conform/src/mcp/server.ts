@@ -27,7 +27,7 @@ export interface CreateServerOptions {
  */
 export function createServer(options: CreateServerOptions = {}): McpServer {
   const server = new McpServer({
-    name: "cm-standards",
+    name: "standards",
     version: "1.0.0",
   });
 
