@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+ 
 import { execa } from "execa";
 
 import { type CheckResult, type Violation } from "../../core/index.js";
@@ -282,7 +282,7 @@ export class RepoRunner extends BaseProcessToolRunner {
     return violations;
   }
 
-  // eslint-disable-next-line complexity
+   
   private checkPullRequestRuleSettings(
     prRule: RulesetRule | undefined,
     bpConfig: RulesetConfig,
@@ -328,7 +328,7 @@ export class RepoRunner extends BaseProcessToolRunner {
     return violations;
   }
 
-  // eslint-disable-next-line complexity
+   
   private checkStatusChecksRuleSettings(
     statusRule: RulesetRule | undefined,
     bpConfig: RulesetConfig,

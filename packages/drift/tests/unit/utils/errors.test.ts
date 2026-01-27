@@ -4,7 +4,7 @@ import {
   extractExecError,
   getErrorMessage,
   type ExecError,
-} from "./errors.js";
+} from "../../../src/utils/errors.js";
 
 describe("error utilities", () => {
   describe("isExecError", () => {

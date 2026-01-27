@@ -9,7 +9,7 @@ import {
   hasCheckToml,
   hasMetadata,
   isScannableRepo,
-} from "./detection.js";
+} from "../../../src/repo/detection.js";
 
 describe("repo detection", () => {
   let testDir: string;

@@ -32,7 +32,7 @@ export async function runDiff(options: SyncOptions): Promise<void> {
 }
 
 /** Run sync command - apply changes (or preview if --apply not set) */
-// eslint-disable-next-line max-statements
+ 
 export async function runSync(options: SyncOptions): Promise<void> {
   try {
     const diffResult = await getDiffResult(options);

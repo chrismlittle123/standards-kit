@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import * as apiUtils from "./api-utils.js";
+import * as apiUtils from "../../../src/github/api-utils.js";
 
 describe("repo-checks", () => {
   const mockFetchWithRetry = vi.spyOn(apiUtils, "fetchWithRetry");
@@ -10,7 +10,7 @@ describe("repo-checks", () => {
 
   describe("fileExists", () => {
     it("returns true when file exists", async () => {
-      const { fileExists } = await import("./repo-checks.js");
+      const { fileExists } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("{}", { status: 200 })
@@ -33,7 +33,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when file does not exist", async () => {
-      const { fileExists } = await import("./repo-checks.js");
+      const { fileExists } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Not Found", { status: 404 })
@@ -51,7 +51,7 @@ describe("repo-checks", () => {
 
   describe("hasRemoteMetadataConfig", () => {
     it("returns true when standards.toml has [metadata] with tier", async () => {
-      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+      const { hasRemoteMetadataConfig } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[metadata]\ntier = "production"', { status: 200 })
@@ -63,7 +63,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when standards.toml has no [metadata] section", async () => {
-      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+      const { hasRemoteMetadataConfig } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[code.linting.eslint]\nenabled = true', { status: 200 })
@@ -75,7 +75,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when [metadata] has no tier", async () => {
-      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+      const { hasRemoteMetadataConfig } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[metadata]\nteam = "backend"', { status: 200 })
@@ -87,7 +87,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when standards.toml does not exist", async () => {
-      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+      const { hasRemoteMetadataConfig } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Not Found", { status: 404 })
@@ -99,7 +99,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false for invalid TOML", async () => {
-      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+      const { hasRemoteMetadataConfig } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("invalid toml {{", { status: 200 })
@@ -113,7 +113,7 @@ describe("repo-checks", () => {
 
   describe("isRepoScannable", () => {
     it("returns true when standards.toml has [metadata] section with tier", async () => {
-      const { isRepoScannable } = await import("./repo-checks.js");
+      const { isRepoScannable } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[metadata]\ntier = "production"', { status: 200 })
@@ -125,7 +125,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when standards.toml does not exist", async () => {
-      const { isRepoScannable } = await import("./repo-checks.js");
+      const { isRepoScannable } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Not Found", { status: 404 })
@@ -137,7 +137,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when standards.toml has no [metadata] section", async () => {
-      const { isRepoScannable } = await import("./repo-checks.js");
+      const { isRepoScannable } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[code.linting.eslint]\nenabled = true', { status: 200 })
@@ -149,7 +149,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when [metadata] exists but has no tier", async () => {
-      const { isRepoScannable } = await import("./repo-checks.js");
+      const { isRepoScannable } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[metadata]\nproject = "backend"', { status: 200 })
@@ -163,7 +163,7 @@ describe("repo-checks", () => {
 
   describe("hasRemoteCheckToml", () => {
     it("returns true when standards.toml exists", async () => {
-      const { hasRemoteCheckToml } = await import("./repo-checks.js");
+      const { hasRemoteCheckToml } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("{}", { status: 200 })
@@ -182,7 +182,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when standards.toml does not exist", async () => {
-      const { hasRemoteCheckToml } = await import("./repo-checks.js");
+      const { hasRemoteCheckToml } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Not Found", { status: 404 })
@@ -194,7 +194,7 @@ describe("repo-checks", () => {
     });
 
     it("passes token to request headers", async () => {
-      const { hasRemoteCheckToml } = await import("./repo-checks.js");
+      const { hasRemoteCheckToml } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("{}", { status: 200 })
@@ -216,7 +216,7 @@ describe("repo-checks", () => {
 
   describe("hasRecentCommits", () => {
     it("returns true when main branch has recent commits", async () => {
-      const { hasRecentCommits } = await import("./repo-checks.js");
+      const { hasRecentCommits } = await import("../../../src/github/repo-checks.js");
 
       // Mock response with one commit
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -239,7 +239,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when main branch has no recent commits", async () => {
-      const { hasRecentCommits } = await import("./repo-checks.js");
+      const { hasRecentCommits } = await import("../../../src/github/repo-checks.js");
 
       // Mock response with empty array (no commits)
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -252,7 +252,7 @@ describe("repo-checks", () => {
     });
 
     it("falls back to master branch when main returns 404", async () => {
-      const { hasRecentCommits } = await import("./repo-checks.js");
+      const { hasRecentCommits } = await import("../../../src/github/repo-checks.js");
 
       // Main branch returns 404, master returns commits
       mockFetchWithRetry
@@ -273,7 +273,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when both main and master return 404", async () => {
-      const { hasRecentCommits } = await import("./repo-checks.js");
+      const { hasRecentCommits } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry
         .mockResolvedValueOnce(new Response("Not Found", { status: 404 }))
@@ -285,7 +285,7 @@ describe("repo-checks", () => {
     });
 
     it("returns false when master branch has no recent commits", async () => {
-      const { hasRecentCommits } = await import("./repo-checks.js");
+      const { hasRecentCommits } = await import("../../../src/github/repo-checks.js");
 
       // Main branch returns 404, master returns empty
       mockFetchWithRetry
@@ -300,7 +300,7 @@ describe("repo-checks", () => {
     });
 
     it("passes token to request headers", async () => {
-      const { hasRecentCommits } = await import("./repo-checks.js");
+      const { hasRecentCommits } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response(JSON.stringify([{ sha: "abc" }]), { status: 200 })
@@ -320,7 +320,7 @@ describe("repo-checks", () => {
     });
 
     it("includes since parameter with correct timestamp", async () => {
-      const { hasRecentCommits } = await import("./repo-checks.js");
+      const { hasRecentCommits } = await import("../../../src/github/repo-checks.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response(JSON.stringify([]), { status: 200 })

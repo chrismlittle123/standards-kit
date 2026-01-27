@@ -5,13 +5,13 @@ vi.mock("@standards-kit/conform", () => ({
   validateProcess: vi.fn(),
 }));
 
-vi.mock("../../github/process-repo-discovery.js", () => ({
+vi.mock("../../../../src/github/process-repo-discovery.js", () => ({
   discoverProcessRepos: vi.fn(),
 }));
 
-vi.mock("../../github/client.js", async (importOriginal) => {
+vi.mock("../../../../src/github/client.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../../github/client.js")>();
+    await importOriginal<typeof import("../../../../src/github/client.js")>();
   return {
     ...actual,
     createIssue: vi.fn(),
@@ -21,8 +21,8 @@ vi.mock("../../github/client.js", async (importOriginal) => {
 
 // Import after mocking
 import { validateProcess } from "@standards-kit/conform";
-import { discoverProcessRepos } from "../../github/process-repo-discovery.js";
-import { createIssue, getGitHubToken } from "../../github/client.js";
+import { discoverProcessRepos } from "../../../../src/github/process-repo-discovery.js";
+import { createIssue, getGitHubToken } from "../../../../src/github/client.js";
 
 // Helper to create a valid ValidateProcessResult
 function createValidateResult(
@@ -113,7 +113,7 @@ describe("process/scan", () => {
       // Both repos pass
       mockValidateProcess.mockResolvedValue(createValidateResult([]));
 
-      const { scan } = await import("./scan.js");
+      const { scan } = await import("../../../../src/commands/process/scan.js");
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -177,7 +177,7 @@ describe("process/scan", () => {
         html_url: "https://github.com/test-org/repo-with-violations/issues/42",
       });
 
-      const { scan } = await import("./scan.js");
+      const { scan } = await import("../../../../src/commands/process/scan.js");
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -238,7 +238,7 @@ describe("process/scan", () => {
         ])
       );
 
-      const { scan } = await import("./scan.js");
+      const { scan } = await import("../../../../src/commands/process/scan.js");
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -288,7 +288,7 @@ describe("process/scan", () => {
         .mockRejectedValueOnce(new Error("API rate limit exceeded"))
         .mockResolvedValueOnce(createValidateResult([]));
 
-      const { scan } = await import("./scan.js");
+      const { scan } = await import("../../../../src/commands/process/scan.js");
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -346,7 +346,7 @@ describe("process/scan", () => {
         html_url: "https://github.com/test-org/failing-repo/issues/1",
       });
 
-      const { scan } = await import("./scan.js");
+      const { scan } = await import("../../../../src/commands/process/scan.js");
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -385,7 +385,7 @@ describe("process/scan", () => {
 
       mockValidateProcess.mockResolvedValueOnce(createValidateResult([]));
 
-      const { scan } = await import("./scan.js");
+      const { scan } = await import("../../../../src/commands/process/scan.js");
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -412,7 +412,7 @@ describe("process/scan", () => {
         filteredByActivity: false,
       });
 
-      const { scan } = await import("./scan.js");
+      const { scan } = await import("../../../../src/commands/process/scan.js");
 
       const mockExit = vi
         .spyOn(process, "exit")

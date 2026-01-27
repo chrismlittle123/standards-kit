@@ -7,8 +7,8 @@ import {
   createTempDir,
   removeTempDir,
   cloneRepo,
-} from "./client.js";
-import * as apiUtils from "./api-utils.js";
+} from "../../../src/github/client.js";
+import * as apiUtils from "../../../src/github/api-utils.js";
 
 describe("github client", () => {
   let testDir: string;
@@ -196,7 +196,7 @@ describe("github client API functions", () => {
 
   describe("listOrgRepos", () => {
     it("fetches repos from org endpoint", async () => {
-      const { listOrgRepos } = await import("./client.js");
+      const { listOrgRepos } = await import("../../../src/github/client.js");
       const repos = [mockRepo("repo1"), mockRepo("repo2")];
 
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -219,7 +219,7 @@ describe("github client API functions", () => {
     });
 
     it("filters out archived and disabled repos", async () => {
-      const { listOrgRepos } = await import("./client.js");
+      const { listOrgRepos } = await import("../../../src/github/client.js");
       const repos = [
         mockRepo("active"),
         mockRepo("archived", true, false),
@@ -237,7 +237,7 @@ describe("github client API functions", () => {
     });
 
     it("handles pagination", async () => {
-      const { listOrgRepos } = await import("./client.js");
+      const { listOrgRepos } = await import("../../../src/github/client.js");
       // First page: 100 repos (full page indicates more pages)
       const page1 = Array.from({ length: 100 }, (_, i) =>
         mockRepo(`repo${i + 1}`)
@@ -260,7 +260,7 @@ describe("github client API functions", () => {
     });
 
     it("stops pagination on empty page", async () => {
-      const { listOrgRepos } = await import("./client.js");
+      const { listOrgRepos } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response(JSON.stringify([]), { status: 200 })
@@ -274,7 +274,7 @@ describe("github client API functions", () => {
 
   describe("listUserRepos", () => {
     it("fetches repos from user endpoint", async () => {
-      const { listUserRepos } = await import("./client.js");
+      const { listUserRepos } = await import("../../../src/github/client.js");
       const repos = [mockRepo("user-repo")];
 
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -292,7 +292,7 @@ describe("github client API functions", () => {
     });
 
     it("works without token", async () => {
-      const { listUserRepos } = await import("./client.js");
+      const { listUserRepos } = await import("../../../src/github/client.js");
       const repos = [mockRepo("public-repo")];
 
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -315,7 +315,7 @@ describe("github client API functions", () => {
 
   describe("listRepos", () => {
     it("returns repos as org when org endpoint succeeds", async () => {
-      const { listRepos } = await import("./client.js");
+      const { listRepos } = await import("../../../src/github/client.js");
       const repos = [mockRepo("org-repo")];
 
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -329,7 +329,7 @@ describe("github client API functions", () => {
     });
 
     it("falls back to user endpoint on 404", async () => {
-      const { listRepos } = await import("./client.js");
+      const { listRepos } = await import("../../../src/github/client.js");
       const userRepos = [mockRepo("user-repo")];
 
       // First call: org endpoint returns 404
@@ -348,7 +348,7 @@ describe("github client API functions", () => {
     });
 
     it("throws non-404 errors", async () => {
-      const { listRepos } = await import("./client.js");
+      const { listRepos } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Server Error", { status: 500 })
@@ -360,7 +360,7 @@ describe("github client API functions", () => {
 
   describe("repoExists", () => {
     it("returns true for existing repo", async () => {
-      const { repoExists } = await import("./client.js");
+      const { repoExists } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("{}", { status: 200 })
@@ -377,7 +377,7 @@ describe("github client API functions", () => {
     });
 
     it("returns false for non-existing repo", async () => {
-      const { repoExists } = await import("./client.js");
+      const { repoExists } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Not Found", { status: 404 })
@@ -389,7 +389,7 @@ describe("github client API functions", () => {
     });
 
     it("passes token to request headers", async () => {
-      const { repoExists } = await import("./client.js");
+      const { repoExists } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("{}", { status: 200 })
@@ -411,7 +411,7 @@ describe("github client API functions", () => {
 
   describe("fileExists", () => {
     it("returns true when file exists", async () => {
-      const { fileExists } = await import("./client.js");
+      const { fileExists } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("{}", { status: 200 })
@@ -434,7 +434,7 @@ describe("github client API functions", () => {
     });
 
     it("returns false when file does not exist", async () => {
-      const { fileExists } = await import("./client.js");
+      const { fileExists } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Not Found", { status: 404 })
@@ -450,7 +450,7 @@ describe("github client API functions", () => {
     });
 
     it("passes token to request headers", async () => {
-      const { fileExists } = await import("./client.js");
+      const { fileExists } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("{}", { status: 200 })
@@ -472,7 +472,7 @@ describe("github client API functions", () => {
 
   describe("isRepoScannable", () => {
     it("returns true when standards.toml has [metadata] section with tier", async () => {
-      const { isRepoScannable } = await import("./client.js");
+      const { isRepoScannable } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[metadata]\ntier = "production"', { status: 200 })
@@ -485,7 +485,7 @@ describe("github client API functions", () => {
     });
 
     it("returns false when standards.toml does not exist", async () => {
-      const { isRepoScannable } = await import("./client.js");
+      const { isRepoScannable } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Not Found", { status: 404 })
@@ -498,7 +498,7 @@ describe("github client API functions", () => {
     });
 
     it("returns false when standards.toml has no [metadata] section", async () => {
-      const { isRepoScannable } = await import("./client.js");
+      const { isRepoScannable } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[code.linting.eslint]\nenabled = true', { status: 200 })
@@ -511,7 +511,7 @@ describe("github client API functions", () => {
     });
 
     it("returns false when [metadata] exists but has no tier", async () => {
-      const { isRepoScannable } = await import("./client.js");
+      const { isRepoScannable } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[metadata]\nproject = "backend"', { status: 200 })
@@ -524,7 +524,7 @@ describe("github client API functions", () => {
     });
 
     it("passes token to file check", async () => {
-      const { isRepoScannable } = await import("./client.js");
+      const { isRepoScannable } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response('[metadata]\ntier = "production"', { status: 200 })
@@ -542,7 +542,7 @@ describe("github client API functions", () => {
 
   describe("parseRepoResponse error handling", () => {
     it("throws error for invalid JSON response", async () => {
-      const { listOrgRepos } = await import("./client.js");
+      const { listOrgRepos } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("not valid json", { status: 200 })
@@ -554,7 +554,7 @@ describe("github client API functions", () => {
     });
 
     it("throws error for invalid schema", async () => {
-      const { listOrgRepos } = await import("./client.js");
+      const { listOrgRepos } = await import("../../../src/github/client.js");
 
       // Missing required fields
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -567,7 +567,7 @@ describe("github client API functions", () => {
     });
 
     it("sanitizes error messages", async () => {
-      const { listOrgRepos } = await import("./client.js");
+      const { listOrgRepos } = await import("../../../src/github/client.js");
       const token = "ghp_secrettoken123";
 
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -582,7 +582,7 @@ describe("github client API functions", () => {
 
   describe("createIssue", () => {
     it("creates issue with correct parameters", async () => {
-      const { createIssue } = await import("./client.js");
+      const { createIssue } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response(
@@ -618,7 +618,7 @@ describe("github client API functions", () => {
     });
 
     it("includes labels in request body", async () => {
-      const { createIssue } = await import("./client.js");
+      const { createIssue } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response(
@@ -648,7 +648,7 @@ describe("github client API functions", () => {
     });
 
     it("throws error on API failure", async () => {
-      const { createIssue } = await import("./client.js");
+      const { createIssue } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("Forbidden", { status: 403 })
@@ -669,7 +669,7 @@ describe("github client API functions", () => {
     });
 
     it("sanitizes token in error messages", async () => {
-      const { createIssue } = await import("./client.js");
+      const { createIssue } = await import("../../../src/github/client.js");
       const token = "ghp_secrettoken123";
 
       mockFetchWithRetry.mockResolvedValueOnce(
@@ -691,7 +691,7 @@ describe("github client API functions", () => {
     });
 
     it("throws error for invalid response schema", async () => {
-      const { createIssue } = await import("./client.js");
+      const { createIssue } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response(JSON.stringify({ invalid: "response" }), { status: 201 })
@@ -712,7 +712,7 @@ describe("github client API functions", () => {
     });
 
     it("throws error for invalid JSON response", async () => {
-      const { createIssue } = await import("./client.js");
+      const { createIssue } = await import("../../../src/github/client.js");
 
       mockFetchWithRetry.mockResolvedValueOnce(
         new Response("not json", { status: 201 })

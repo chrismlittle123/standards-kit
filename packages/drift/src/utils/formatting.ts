@@ -56,7 +56,7 @@ export function getSeverityColor(severity: string): string {
  * @param warnings - Array of warning messages to display
  * @param additionalMessage - Optional message to show after warnings
  */
-/* eslint-disable no-console */
+ 
 export function printWarnings(
   title: string,
   warnings: string[],
@@ -73,7 +73,7 @@ export function printWarnings(
   }
   console.log("");
 }
-/* eslint-enable no-console */
+ 
 
 /**
  * Check if running in GitHub Actions environment
@@ -87,7 +87,7 @@ export function isGitHubActions(): boolean {
  * These create annotations in the Actions UI for better visibility.
  * See: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions
  */
-/* eslint-disable no-console */
+ 
 export const actionsOutput = {
   /**
    * Create an error annotation in GitHub Actions
@@ -141,4 +141,4 @@ export const actionsOutput = {
     console.log("::endgroup::");
   },
 };
-/* eslint-enable no-console */
+ 

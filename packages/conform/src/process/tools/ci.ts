@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- CI workflow validation requires comprehensive coverage of jobs, actions, and commands */
+ 
 import * as yaml from "js-yaml";
 
 import { type CheckResult, type Violation } from "../../core/index.js";

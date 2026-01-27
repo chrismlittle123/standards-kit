@@ -78,7 +78,7 @@ function handleBranchFetchError(error: unknown, branch: string): BranchProtectio
 }
 
 /** Find and parse the branch protection ruleset */
-// eslint-disable-next-line complexity
+ 
 function parseBranchRuleset(rulesets: GitHubRuleset[], branch: string): BranchProtectionSettings {
   // Find ruleset targeting branches that includes the specified branch
   const branchRuleset = rulesets.find(

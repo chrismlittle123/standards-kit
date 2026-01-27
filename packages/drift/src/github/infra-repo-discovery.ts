@@ -108,7 +108,7 @@ function buildResult(o: ResultOpts): InfraRepoDiscoveryResult {
 }
 
 /** Discover repositories with [infra] config, optionally filtering by recent activity. */
-// eslint-disable-next-line max-lines-per-function
+ 
 export async function discoverInfraRepos(
   opts: DiscoverInfraReposOptions
 ): Promise<InfraRepoDiscoveryResult> {

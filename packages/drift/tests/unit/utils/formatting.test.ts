@@ -7,7 +7,7 @@ import {
   printWarnings,
   isGitHubActions,
   actionsOutput,
-} from "./formatting.js";
+} from "../../../src/utils/formatting.js";
 
 describe("formatting", () => {
   describe("COLORS", () => {

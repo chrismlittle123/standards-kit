@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { sanitizeError, fetchWithRetry } from "./api-utils.js";
+import { sanitizeError, fetchWithRetry } from "../../../src/github/api-utils.js";
 
 describe("api-utils", () => {
   describe("sanitizeError", () => {
