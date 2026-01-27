@@ -1,0 +1,11 @@
+# standards.toml for @standards-kit/conform package
+
+[metadata]
+tier = "internal"
+
+[code.linting.eslint]
+enabled = true
+files = ["src/**/*.ts"]
+
+[code.types.tsc]
+enabled = true

@@ -7,7 +7,7 @@ import { type Guideline, type MatchedGuideline } from "./types.js";
  * Parse a context string into keywords.
  * Extracts words, lowercases them, and removes duplicates.
  */
-export function parseContext(context: string): string[] {
+function parseContext(context: string): string[] {
   const words = context
     .toLowerCase()
     .split(/[\s,.\-_/]+/)
@@ -19,7 +19,7 @@ export function parseContext(context: string): string[] {
 /**
  * Score a guideline based on how many keywords match its tags.
  */
-export function scoreGuideline(guideline: Guideline, keywords: string[]): number {
+function scoreGuideline(guideline: Guideline, keywords: string[]): number {
   const tags = new Set(guideline.tags.map((t) => t.toLowerCase()));
   let score = 0;
 

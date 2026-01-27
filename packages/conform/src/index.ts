@@ -51,7 +51,6 @@ export {
 // Process domain
 export {
   auditProcessConfig,
-  BaseProcessToolRunner,
   HooksRunner,
   runProcessChecks,
 } from "./process/index.js";

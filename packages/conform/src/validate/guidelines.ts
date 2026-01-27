@@ -11,13 +11,13 @@ import { frontmatterSchema } from "../mcp/standards/index.js";
 import { ExitCode } from "../core/index.js";
 
 /** Single file validation error */
-export interface GuidelineValidationError {
+interface GuidelineValidationError {
   file: string;
   errors: string[];
 }
 
 /** Overall validation result */
-export interface GuidelineValidationResult {
+interface GuidelineValidationResult {
   valid: boolean;
   validCount: number;
   invalidCount: number;
@@ -40,7 +40,7 @@ function formatTextOutput(result: GuidelineValidationResult): string {
 }
 
 /** Validate a directory of guideline files */
-export function validateGuidelinesDir(dirPath: string): GuidelineValidationResult {
+function validateGuidelinesDir(dirPath: string): GuidelineValidationResult {
   const files = fs.readdirSync(dirPath).filter((f) => f.endsWith(".md"));
   const result: GuidelineValidationResult = {
     valid: true,

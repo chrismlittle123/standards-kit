@@ -40,12 +40,12 @@ enabled = true
 };
 
 /** Get the default template for a project type */
-export function getTemplate(type: ProjectType): string {
+function getTemplate(type: ProjectType): string {
   return TEMPLATES[type];
 }
 
 /** Get a template that extends from a registry */
-export function getExtendsTemplate(registryPath: string, projectType: ProjectType): string {
+function getExtendsTemplate(registryPath: string, projectType: ProjectType): string {
   return `# standards.toml - Extends from shared registry
 
 [extends]

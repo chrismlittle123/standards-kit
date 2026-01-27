@@ -34,11 +34,3 @@ export {
 } from "./loader.js";
 export type { ConfigOverride } from "./loader.js";
 
-// Registry
-export {
-  parseRegistryUrl,
-  fetchRegistry,
-  loadRuleset,
-  mergeConfigs,
-  resolveExtends,
-} from "./registry.js";

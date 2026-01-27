@@ -16,7 +16,7 @@ import { getDependencies, type GetDependenciesResult } from "./dependencies.js";
 /**
  * Status of a dependency file change
  */
-export type DependencyChangeStatus = "added" | "modified" | "deleted";
+type DependencyChangeStatus = "added" | "modified" | "deleted";
 
 /**
  * A single dependency file that has changed

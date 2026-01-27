@@ -5,6 +5,4 @@ export {
   handleError,
   runCheck,
   runAudit,
-  buildResult,
-  type DomainFilter,
 } from "./utils.js";

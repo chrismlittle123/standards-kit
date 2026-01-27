@@ -86,6 +86,6 @@ export async function getChecker(service: string): Promise<ResourceChecker | und
 /**
  * Clear the checker cache (useful for testing)
  */
-export function clearCheckerCache(): void {
+function _clearCheckerCache(): void {
   checkerCache.clear();
 }

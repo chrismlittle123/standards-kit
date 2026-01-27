@@ -8,8 +8,8 @@ import {
   type CheckTomlValidation,
 } from "./check-toml.js";
 
-export type RepoTier = "production" | "internal" | "prototype";
-export type RepoStatus = "active" | "pre-release" | "deprecated";
+type RepoTier = "production" | "internal" | "prototype";
+type RepoStatus = "active" | "pre-release" | "deprecated";
 
 export interface RepoMetadata {
   tier: RepoTier;
@@ -19,8 +19,6 @@ export interface RepoMetadata {
   raw: Record<string, unknown>;
 }
 
-// Re-export CheckTomlValidation type
-export type { CheckTomlValidation } from "./check-toml.js";
 
 export interface ScannabilityResult {
   scannable: boolean;
@@ -180,7 +178,7 @@ const SKIP_DIRS = new Set([
 ]);
 
 /** Callback for logging skipped directories during search. */
-export type SkippedDirLogger = (dirPath: string, reason: string) => void;
+type SkippedDirLogger = (dirPath: string, reason: string) => void;
 
 /** Options for findCheckTomlFiles */
 export interface FindCheckTomlOptions {
@@ -222,8 +220,6 @@ function searchForCheckToml(
   }
 }
 
-// Re-export validateCheckToml for backward compatibility
-export { validateCheckToml } from "./check-toml.js";
 
 /** Find all standards.toml files in a repository. */
 export function findCheckTomlFiles(

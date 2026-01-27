@@ -22,7 +22,7 @@ export const frontmatterSchema = z.object({
 /**
  * Parse a guideline markdown file content into a Guideline object.
  */
-export function parseGuideline(fileContent: string, filename: string): Guideline {
+function parseGuideline(fileContent: string, filename: string): Guideline {
   const { data, content } = matter(fileContent);
 
   const result = frontmatterSchema.safeParse(data);

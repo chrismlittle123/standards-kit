@@ -1,0 +1,113 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  check-branch-name:
+    name: Branch Naming
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch naming convention
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Checking branch: $BRANCH_NAME"
+
+          # Pattern: (feature|fix|hotfix|docs)/vX.Y.Z/description
+          PATTERN="^(feature|fix|hotfix|docs)/v[0-9]+\.[0-9]+\.[0-9]+/.+$"
+
+          if [[ "$BRANCH_NAME" =~ $PATTERN ]]; then
+            echo "✅ Branch name '$BRANCH_NAME' follows naming convention"
+          else
+            echo "❌ Branch name '$BRANCH_NAME' does not follow naming convention"
+            echo ""
+            echo "Branch names must match: (feature|fix|hotfix|docs)/vX.Y.Z/description"
+            echo ""
+            echo "Examples:"
+            echo "  ✅ feature/v1.5.0/add-dark-mode"
+            echo "  ✅ fix/v1.4.2/audit-bug"
+            echo "  ✅ hotfix/v1.4.1/critical-security-fix"
+            echo "  ✅ docs/v1.6.5/update-readme"
+            echo ""
+            echo "  ❌ feature/add-dark-mode (missing version)"
+            echo "  ❌ v1.5/feature/something (wrong order)"
+            echo "  ❌ fix/v1.5/bug (version must be X.Y.Z)"
+            exit 1
+          fi
+
+  check-pr-size:
+    name: PR Size
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        run: |
+          BASE="${{ github.base_ref }}"
+          HEAD="${{ github.head_ref }}"
+
+          # Get lines changed (additions + deletions)
+          STATS=$(git diff --shortstat origin/$BASE...HEAD)
+          echo "Change stats: $STATS"
+
+          # Extract insertions and deletions
+          INSERTIONS=$(echo "$STATS" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+          DELETIONS=$(echo "$STATS" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+
+          TOTAL=$((INSERTIONS + DELETIONS))
+          echo "Total lines changed: $TOTAL"
+
+          if [ "$TOTAL" -gt 500 ]; then
+            echo ""
+            echo "⚠️ WARNING: This PR has $TOTAL lines changed (recommended: ~200-300)"
+            echo ""
+            echo "Consider breaking this into smaller PRs for easier review."
+            echo "Large PRs are harder to review and more likely to introduce bugs."
+            # Warning only, don't fail
+          else
+            echo "✅ PR size is good: $TOTAL lines changed"
+          fi
+
+  check-changeset:
+    name: Changeset Required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changeset
+        run: |
+          BASE="${{ github.base_ref }}"
+
+          # Check if any changeset was added
+          if git diff --name-only origin/$BASE...HEAD | grep -q "^\.changeset/.*\.md$"; then
+            echo "✅ Changeset found"
+          else
+            # Check if this is a docs-only or config-only change
+            CHANGED_FILES=$(git diff --name-only origin/$BASE...HEAD)
+
+            # Files that don't require changeset
+            SKIP_PATTERNS="^\.github/|^docs/|^\..*|^README\.md$|^CLAUDE\.md$|\.md$"
+
+            NEEDS_CHANGESET=false
+            while IFS= read -r file; do
+              if ! echo "$file" | grep -qE "$SKIP_PATTERNS"; then
+                NEEDS_CHANGESET=true
+                break
+              fi
+            done <<< "$CHANGED_FILES"
+
+            if [ "$NEEDS_CHANGESET" = true ]; then
+              echo "⚠️ WARNING: No changeset found"
+              echo ""
+              echo "If this PR includes user-facing changes, please add a changeset:"
+              echo "  pnpm changeset"
+              # Warning only, don't fail
+            else
+              echo "✅ No changeset needed for docs/config changes only"
+            fi
+          fi

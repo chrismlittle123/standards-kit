@@ -17,22 +17,7 @@ import {
 } from "./tools/index.js";
 
 // Export tool runners for direct access
-export {
-  BackupsRunner,
-  BaseProcessToolRunner,
-  BranchesRunner,
-  ChangesetsRunner,
-  CiRunner,
-  CodeownersRunner,
-  CommitsRunner,
-  CoverageRunner,
-  DocsRunner,
-  ForbiddenFilesRunner,
-  HooksRunner,
-  PrRunner,
-  RepoRunner,
-  TicketsRunner,
-} from "./tools/index.js";
+export { HooksRunner } from "./tools/index.js";
 
 /** Tool configuration entry mapping config getter to runner or runner factory */
 interface ToolEntry {

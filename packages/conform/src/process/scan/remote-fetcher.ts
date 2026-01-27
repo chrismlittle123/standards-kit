@@ -65,7 +65,7 @@ export async function verifyRepoAccess(repoInfo: RemoteRepoInfo): Promise<boolea
 }
 
 /** Check if a file exists in the remote repository via GitHub Contents API */
-export async function checkRemoteFileExists(
+async function checkRemoteFileExists(
   repoInfo: RemoteRepoInfo,
   filePath: string
 ): Promise<boolean> {

@@ -68,7 +68,7 @@ export const CONCURRENCY = {
 /**
  * Default threshold values
  */
-export const DEFAULTS = {
+const _DEFAULTS = {
   /** Default backup max age in hours */
   backupMaxAgeHours: 24,
   /** Default code coverage minimum threshold */

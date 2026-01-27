@@ -30,13 +30,13 @@ export function configureExitOverride(cmd: Command): Command {
   });
 }
 
-export type DomainFilter = "code" | "process" | undefined;
+type DomainFilter = "code" | "process" | undefined;
 
-export function shouldRunDomain(filter: DomainFilter, domain: "code" | "process"): boolean {
+function shouldRunDomain(filter: DomainFilter, domain: "code" | "process"): boolean {
   return !filter || filter === domain;
 }
 
-export function buildResult(
+function buildResult(
   version: string,
   configPath: string,
   domains: Record<string, DomainResult>

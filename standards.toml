@@ -1,2 +1,27 @@
-[standards]
-ruleset = "typescript-internal"
+[metadata]
+tier = "internal"
+
+[code.linting.eslint]
+enabled = true
+
+# TypeScript checking happens at package level via turbo
+[code.types.tsc]
+enabled = false
+
+[code.unused.knip]
+enabled = true
+
+[process.hooks]
+enabled = true
+require_husky = true
+require_hooks = ["pre-push", "commit-msg"]
+
+[process.ci]
+enabled = true
+require_workflows = ["ci.yml", "release.yml", "pr-checks.yml"]
+
+[process.commits]
+enabled = true
+types = ["feat", "fix", "chore", "docs", "refactor", "test", "style", "perf", "ci", "build"]
+require_scope = false
+max_subject_length = 100

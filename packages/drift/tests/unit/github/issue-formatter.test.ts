@@ -14,7 +14,7 @@ import type {
   MissingProjectsDetection,
   TierMismatchDetection,
   DependencyChangesDetection,
-} from "../types.js";
+} from "../../../src/types.js";
 
 describe("issue-formatter", () => {
   describe("formatMissingProjectsIssueBody", () => {

@@ -27,7 +27,7 @@ export const AccountKeySchema = z
     /^(aws|gcp):.+$/,
     "Invalid account key format. Expected: provider:accountId (e.g., aws:123456789012, gcp:my-project)"
   );
-export type AccountKey = z.infer<typeof AccountKeySchema>;
+type AccountKey = z.infer<typeof AccountKeySchema>;
 
 // =============================================================================
 // AWS Resource Schemas
