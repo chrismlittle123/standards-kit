@@ -4,6 +4,7 @@
  * Orchestrates checking all resources in a manifest (AWS and GCP)
  */
 
+import { CONCURRENCY } from "../constants.js";
 import { isValidArn, parseArn } from "./arn.js";
 import { getChecker, isSupportedService, SUPPORTED_SERVICES } from "./checkers/index.js";
 import {
@@ -21,11 +22,6 @@ import type {
   MultiAccountManifest,
   ResourceCheckResult,
 } from "./types.js";
-
-/**
- * Default concurrency for parallel checks
- */
-const DEFAULT_CONCURRENCY = 10;
 
 /**
  * Options for scanning
@@ -50,7 +46,7 @@ export async function scanManifest(
   manifestPath: string,
   options: ScanOptions = {}
 ): Promise<InfraScanResult> {
-  const concurrency = options.concurrency ?? DEFAULT_CONCURRENCY;
+  const concurrency = options.concurrency ?? CONCURRENCY.infraScan;
 
   // For multi-account manifests, scan by account
   if (isMultiAccountManifest(manifest)) {
@@ -78,7 +74,7 @@ async function scanMultiAccountManifest(
   manifestPath: string,
   options: ScanOptions = {}
 ): Promise<InfraScanResult> {
-  const concurrency = options.concurrency ?? DEFAULT_CONCURRENCY;
+  const concurrency = options.concurrency ?? CONCURRENCY.infraScan;
   const accountResults: Record<string, AccountScanResult> = {};
   const allResults: ResourceCheckResult[] = [];
 

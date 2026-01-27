@@ -8,7 +8,6 @@ export default defineConfig([
     dts: false, // Use tsc for declarations instead
     clean: true,
     sourcemap: true,
-    external: ["@standards-kit/core"],
   },
   // CLI entry (shebang preserved from source)
   {
@@ -16,6 +15,5 @@ export default defineConfig([
     format: ["esm"],
     dts: false,
     sourcemap: true,
-    external: ["@standards-kit/core"],
   },
 ]);

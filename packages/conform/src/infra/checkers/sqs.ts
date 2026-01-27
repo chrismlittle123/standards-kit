@@ -5,24 +5,13 @@
 import { GetQueueAttributesCommand, GetQueueUrlCommand, SQSClient } from "@aws-sdk/client-sqs";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of SQS clients by region
- */
-const clientCache = new Map<string, SQSClient>();
 
 /**
  * Get or create an SQS client for a region
  */
-function getClient(region: string): SQSClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new SQSClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(SQSClient);
 
 /**
  * SQS queue checker

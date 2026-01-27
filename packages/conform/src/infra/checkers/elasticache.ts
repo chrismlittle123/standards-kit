@@ -15,24 +15,13 @@ import {
 } from "@aws-sdk/client-elasticache";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of ElastiCache clients by region
- */
-const clientCache = new Map<string, ElastiCacheClient>();
 
 /**
  * Get or create an ElastiCache client for a region
  */
-function getClient(region: string): ElastiCacheClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new ElastiCacheClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(ElastiCacheClient);
 
 /**
  * Check if an ElastiCache cluster exists

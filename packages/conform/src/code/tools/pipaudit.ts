@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 
 import { execa } from "execa";
 
+import { TIMEOUTS } from "../../constants.js";
 import { type CheckResult, type Violation } from "../../core/index.js";
 import { BaseToolRunner } from "./base.js";
 
@@ -85,14 +86,14 @@ export class PipAuditRunner extends BaseToolRunner {
       return await execa("uvx", args, {
         cwd: projectRoot,
         reject: false,
-        timeout: 5 * 60 * 1000,
+        timeout: TIMEOUTS.codeTool,
       });
     } catch {
       // Fall back to pip-audit directly (remove "pip-audit" from args for direct call)
       return await execa("pip-audit", args.slice(1), {
         cwd: projectRoot,
         reject: false,
-        timeout: 5 * 60 * 1000,
+        timeout: TIMEOUTS.codeTool,
       });
     }
   }

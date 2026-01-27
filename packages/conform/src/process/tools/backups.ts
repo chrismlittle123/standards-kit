@@ -1,5 +1,6 @@
 import { type _Object, ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 
+import { AWS_DEFAULTS } from "../../constants.js";
 import { type CheckResult, type Violation } from "../../core/index.js";
 import { BaseProcessToolRunner } from "./base.js";
 
@@ -70,7 +71,7 @@ export class BackupsRunner extends BaseProcessToolRunner {
     return (
       this.s3Client ??
       new S3Client({
-        region: this.config.region ?? process.env.AWS_REGION ?? "us-east-1",
+        region: this.config.region ?? process.env.AWS_REGION ?? AWS_DEFAULTS.globalRegion,
       })
     );
   }

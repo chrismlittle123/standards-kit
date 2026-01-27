@@ -3,6 +3,7 @@ import * as path from "node:path";
 
 import { execa } from "execa";
 
+import { TIMEOUTS } from "../../constants.js";
 import { type CheckResult, type Violation } from "../../core/index.js";
 import { BaseToolRunner } from "./base.js";
 
@@ -48,7 +49,7 @@ export class VultureRunner extends BaseToolRunner {
       const result = await execa("vulture", [".", "--exclude", excludePatterns], {
         cwd: projectRoot,
         reject: false,
-        timeout: 5 * 60 * 1000,
+        timeout: TIMEOUTS.codeTool,
       });
 
       if (this.isBinaryNotFound(result)) {

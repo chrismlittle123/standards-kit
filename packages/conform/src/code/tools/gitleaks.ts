@@ -3,6 +3,7 @@ import * as path from "node:path";
 
 import { execa } from "execa";
 
+import { TIMEOUTS } from "../../constants.js";
 import { type CheckResult, type Violation } from "../../core/index.js";
 import { BaseToolRunner } from "./base.js";
 
@@ -116,7 +117,7 @@ export class GitleaksRunner extends BaseToolRunner {
       const result = await execa("gitleaks", args, {
         cwd: projectRoot,
         reject: false,
-        timeout: 5 * 60 * 1000,
+        timeout: TIMEOUTS.codeTool,
       });
 
       return this.processResult(result, elapsed);
@@ -228,7 +229,7 @@ export class GitleaksRunner extends BaseToolRunner {
       await execa("gitleaks", ["version"], {
         cwd: projectRoot,
         reject: true,
-        timeout: 10 * 1000,
+        timeout: TIMEOUTS.versionCheck,
       });
 
       return this.pass(Date.now() - startTime);

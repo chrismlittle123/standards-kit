@@ -8,7 +8,6 @@ A monorepo for standards enforcement tooling.
 |---------|-------------|-----|
 | [@standards-kit/conform](./packages/conform) | In-repo standards enforcement CLI | [![npm](https://img.shields.io/npm/v/@standards-kit/conform)](https://www.npmjs.com/package/@standards-kit/conform) |
 | [@standards-kit/drift](./packages/drift) | Org-wide drift detection CLI | [![npm](https://img.shields.io/npm/v/@standards-kit/drift)](https://www.npmjs.com/package/@standards-kit/drift) |
-| [@standards-kit/core](./packages/core) | Shared types and config parsing (internal) | - |
 
 ## Quick Start
 

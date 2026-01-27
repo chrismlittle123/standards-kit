@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 
 import { minimatch } from "minimatch";
 
+import { GITHUB_API } from "../../constants.js";
 import { type CheckResult, type Violation } from "../../core/index.js";
 import { BaseProcessToolRunner } from "./base.js";
 
@@ -92,7 +93,7 @@ export class PrRunner extends BaseProcessToolRunner {
     token: string
   ): Promise<GitHubPrFile[] | null> {
     const response = await fetch(
-      `https://api.github.com/repos/${repo}/pulls/${prNumber}/files?per_page=100&page=${page}`,
+      `${GITHUB_API.baseUrl}/repos/${repo}/pulls/${prNumber}/files?per_page=${GITHUB_API.perPage}&page=${page}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

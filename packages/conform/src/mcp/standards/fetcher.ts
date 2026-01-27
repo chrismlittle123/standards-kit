@@ -7,9 +7,9 @@ import * as path from "node:path";
 
 import { execa } from "execa";
 
-const DEFAULT_OWNER = "palindrom-ai";
-const DEFAULT_REPO = "standards";
-const CACHE_DIR = path.join(os.tmpdir(), "cm-standards-cache");
+import { CACHE, STANDARDS_REPO, TIMEOUTS } from "../../constants.js";
+
+const CACHE_DIR = path.join(os.tmpdir(), CACHE.standardsCacheDir);
 
 /** Parsed GitHub source */
 interface GitHubSource {
@@ -121,7 +121,7 @@ function buildGitHubUrl(auth: AuthMethod, owner: string, repo: string): string {
  */
 async function updateExistingRepo(repoDir: string): Promise<boolean> {
   try {
-    await execa("git", ["pull", "--ff-only"], { cwd: repoDir, timeout: 30_000 });
+    await execa("git", ["pull", "--ff-only"], { cwd: repoDir, timeout: TIMEOUTS.git });
     return true;
   } catch {
     // If update fails, remove the directory so it will be re-cloned
@@ -147,12 +147,12 @@ async function cloneRepo(repoDir: string, owner: string, repo: string, ref?: str
     args.push(url, repoDir);
 
     await execa("git", args, {
-      timeout: 30_000,
+      timeout: TIMEOUTS.git,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes("timed out")) {
-      throw new StandardsError(`Standards repo clone timed out after 30 seconds`);
+      throw new StandardsError(`Standards repo clone timed out after ${TIMEOUTS.git / 1000} seconds`);
     }
     throw new StandardsError(`Failed to clone standards repo: ${message}`);
   }
@@ -223,7 +223,7 @@ export async function fetchStandardsRepoFromSource(
  * Returns the path to the cached repository.
  */
 export async function fetchStandardsRepo(): Promise<string> {
-  return fetchGitHubRepo(DEFAULT_OWNER, DEFAULT_REPO);
+  return fetchGitHubRepo(STANDARDS_REPO.owner, STANDARDS_REPO.repo);
 }
 
 /**

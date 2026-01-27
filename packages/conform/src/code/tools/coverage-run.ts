@@ -3,6 +3,7 @@ import * as path from "node:path";
 
 import { execa } from "execa";
 
+import { TIMEOUTS } from "../../constants.js";
 import { CheckResultBuilder, type CheckResult, type Violation } from "../../core/index.js";
 import { BaseToolRunner } from "./base.js";
 
@@ -340,7 +341,7 @@ export class CoverageRunRunner extends BaseToolRunner {
     const result = await execa(testCommand.cmd, testCommand.args, {
       cwd: projectRoot,
       reject: false,
-      timeout: 10 * 60 * 1000,
+      timeout: TIMEOUTS.codeToolExtended,
       env: { ...process.env, CI: "true" },
     });
     return { exitCode: result.exitCode, stderr: result.stderr, stdout: result.stdout };

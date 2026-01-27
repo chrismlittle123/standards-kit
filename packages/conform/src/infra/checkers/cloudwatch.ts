@@ -5,24 +5,13 @@
 import { CloudWatchLogsClient, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of CloudWatch Logs clients by region
- */
-const clientCache = new Map<string, CloudWatchLogsClient>();
 
 /**
  * Get or create a CloudWatch Logs client for a region
  */
-function getClient(region: string): CloudWatchLogsClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new CloudWatchLogsClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(CloudWatchLogsClient);
 
 /**
  * CloudWatch Logs log group checker

@@ -6,6 +6,7 @@ import * as path from "node:path";
 import * as toml from "@iarna/toml";
 import { execa } from "execa";
 
+import { CACHE, TIMEOUTS } from "../constants.js";
 import { ConfigError } from "./loader.js";
 import { type Config, configSchema } from "./schema.js";
 
@@ -139,11 +140,11 @@ async function cloneRepo(location: RegistryLocation, repoDir: string): Promise<v
   cloneArgs.push(location.path, repoDir);
 
   try {
-    await execa("git", cloneArgs, { timeout: 30 * 1000 }); // 30 second timeout
+    await execa("git", cloneArgs, { timeout: TIMEOUTS.git });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes("timed out")) {
-      throw new ConfigError(`Registry clone timed out after 30 seconds: ${location.path}`);
+      throw new ConfigError(`Registry clone timed out after ${TIMEOUTS.git / 1000} seconds: ${location.path}`);
     }
     throw new ConfigError(`Failed to clone registry: ${message}`);
   }
@@ -157,7 +158,7 @@ export async function fetchRegistry(location: RegistryLocation): Promise<string>
     return location.path;
   }
 
-  const cacheDir = path.join(os.tmpdir(), "conform-registry-cache");
+  const cacheDir = path.join(os.tmpdir(), CACHE.registryCacheDir);
   const repoDir = path.join(cacheDir, `${location.owner}-${location.repo}`);
 
   if (fs.existsSync(repoDir)) {

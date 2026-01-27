@@ -15,24 +15,13 @@ import {
 } from "@aws-sdk/client-ecs";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of ECS clients by region
- */
-const clientCache = new Map<string, ECSClient>();
 
 /**
  * Get or create an ECS client for a region
  */
-function getClient(region: string): ECSClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new ECSClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(ECSClient);
 
 /**
  * Check if an ECS cluster exists

@@ -4,30 +4,30 @@
 
 import { HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 
+import { AWS_DEFAULTS } from "../../constants.js";
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactoryWithConfig } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
 
 /**
- * Cache of S3 clients by region
+ * Get or create an S3 client for a region.
+ * S3 is global, but we use the default region for global operations.
+ * Uses followRegionRedirects for cross-region bucket access.
  */
-const clientCache = new Map<string, S3Client>();
+const getClientForRegion = createClientFactoryWithConfig(
+  (region: string) =>
+    new S3Client({
+      region,
+      followRegionRedirects: true,
+    })
+);
 
 /**
- * Get or create an S3 client for a region
+ * Get S3 client with fallback to default region
  */
 function getClient(region: string): S3Client {
-  // S3 is global, but we use us-east-1 for global operations
-  const effectiveRegion = region || "us-east-1";
-
-  let client = clientCache.get(effectiveRegion);
-  if (!client) {
-    client = new S3Client({
-      region: effectiveRegion,
-      followRegionRedirects: true,
-    });
-    clientCache.set(effectiveRegion, client);
-  }
-  return client;
+  const effectiveRegion = region || AWS_DEFAULTS.globalRegion;
+  return getClientForRegion(effectiveRegion);
 }
 
 /**

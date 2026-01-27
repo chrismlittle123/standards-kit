@@ -5,24 +5,13 @@
 import { DescribeTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of DynamoDB clients by region
- */
-const clientCache = new Map<string, DynamoDBClient>();
 
 /**
  * Get or create a DynamoDB client for a region
  */
-function getClient(region: string): DynamoDBClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new DynamoDBClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(DynamoDBClient);
 
 /**
  * DynamoDB table checker

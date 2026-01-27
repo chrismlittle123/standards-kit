@@ -5,24 +5,13 @@
 import { GetFunctionCommand, LambdaClient } from "@aws-sdk/client-lambda";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of Lambda clients by region
- */
-const clientCache = new Map<string, LambdaClient>();
 
 /**
  * Get or create a Lambda client for a region
  */
-function getClient(region: string): LambdaClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new LambdaClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(LambdaClient);
 
 /**
  * Lambda function checker

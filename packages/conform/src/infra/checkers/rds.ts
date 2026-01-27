@@ -15,24 +15,13 @@ import {
 } from "@aws-sdk/client-rds";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of RDS clients by region
- */
-const clientCache = new Map<string, RDSClient>();
 
 /**
  * Get or create an RDS client for a region
  */
-function getClient(region: string): RDSClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new RDSClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(RDSClient);
 
 /**
  * Check if an RDS DB instance exists

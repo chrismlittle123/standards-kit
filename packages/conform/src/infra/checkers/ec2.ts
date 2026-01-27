@@ -15,24 +15,13 @@ import {
 } from "@aws-sdk/client-ec2";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of EC2 clients by region
- */
-const clientCache = new Map<string, EC2Client>();
 
 /**
  * Get or create an EC2 client for a region
  */
-function getClient(region: string): EC2Client {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new EC2Client({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(EC2Client);
 
 /**
  * Check if an EC2 instance exists

@@ -4,6 +4,7 @@
 
 import { GetPolicyCommand, GetRoleCommand, IAMClient } from "@aws-sdk/client-iam";
 
+import { AWS_DEFAULTS } from "../../constants.js";
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
 import type { ResourceChecker } from "./types.js";
 
@@ -16,8 +17,8 @@ let client: IAMClient | null = null;
  * Get or create the IAM client
  */
 function getClient(): IAMClient {
-  // IAM is global, use us-east-1
-  client ??= new IAMClient({ region: "us-east-1" });
+  // IAM is global, use the default global region
+  client ??= new IAMClient({ region: AWS_DEFAULTS.globalRegion });
   return client;
 }
 

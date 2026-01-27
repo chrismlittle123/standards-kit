@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { execa } from "execa";
 import { globSync } from "glob";
 
+import { TIMEOUTS } from "../../constants.js";
 import { CheckResultBuilder, type CheckResult, type Violation } from "../../core/index.js";
 import { BaseToolRunner } from "./base.js";
 
@@ -85,7 +86,7 @@ export class ESLintRunner extends BaseToolRunner {
       const result = await execa("npx", ["eslint", ...args], {
         cwd: projectRoot,
         reject: false,
-        timeout: 5 * 60 * 1000,
+        timeout: TIMEOUTS.codeTool,
       });
 
       const violations = this.parseOutput(result.stdout, projectRoot);
@@ -191,7 +192,7 @@ export class ESLintRunner extends BaseToolRunner {
       const result = await execa("npx", ["eslint", "--print-config", sampleFile], {
         cwd: projectRoot,
         reject: false,
-        timeout: 30 * 1000,
+        timeout: TIMEOUTS.quick,
       });
 
       if (result.exitCode !== 0) {

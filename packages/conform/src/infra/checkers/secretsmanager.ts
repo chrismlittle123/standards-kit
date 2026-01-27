@@ -5,24 +5,13 @@
 import { DescribeSecretCommand, SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of Secrets Manager clients by region
- */
-const clientCache = new Map<string, SecretsManagerClient>();
 
 /**
  * Get or create a Secrets Manager client for a region
  */
-function getClient(region: string): SecretsManagerClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new SecretsManagerClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(SecretsManagerClient);
 
 /**
  * Secrets Manager secret checker

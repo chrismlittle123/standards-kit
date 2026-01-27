@@ -5,24 +5,13 @@
 import { GetTopicAttributesCommand, SNSClient } from "@aws-sdk/client-sns";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of SNS clients by region
- */
-const clientCache = new Map<string, SNSClient>();
 
 /**
  * Get or create an SNS client for a region
  */
-function getClient(region: string): SNSClient {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new SNSClient({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(SNSClient);
 
 /**
  * SNS topic checker

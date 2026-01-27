@@ -15,24 +15,13 @@ import {
 } from "@aws-sdk/client-elastic-load-balancing-v2";
 
 import type { ParsedArn, ResourceCheckResult } from "../types.js";
+import { createClientFactory } from "./client-factory.js";
 import type { ResourceChecker } from "./types.js";
-
-/**
- * Cache of ELBv2 clients by region
- */
-const clientCache = new Map<string, ElasticLoadBalancingV2Client>();
 
 /**
  * Get or create an ELBv2 client for a region
  */
-function getClient(region: string): ElasticLoadBalancingV2Client {
-  let client = clientCache.get(region);
-  if (!client) {
-    client = new ElasticLoadBalancingV2Client({ region });
-    clientCache.set(region, client);
-  }
-  return client;
-}
+const getClient = createClientFactory(ElasticLoadBalancingV2Client);
 
 /**
  * Check if a load balancer exists
