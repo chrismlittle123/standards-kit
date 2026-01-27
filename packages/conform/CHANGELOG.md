@@ -1,5 +1,20 @@
 # @standards-kit/conform
 
+## 0.3.0
+
+### Minor Changes
+
+- c22a925: Add conform tests and standards compliance improvements
+
+  - Add 61 unit tests to conform package covering types, schema, and loader modules
+  - Move all drift tests from src/ to tests/unit/ folder structure
+  - Add standards.toml configuration file for self-enforcement
+  - Add ESLint v9 flat config for TypeScript linting
+  - Migrate from Zod v3 to v4 with updated API usage
+  - Update to Node 22 LTS requirement
+  - Split cli.ts into modular components (cli/ directory)
+  - Add ARCHITECTURE.md documentation
+
 ## 0.2.0
 
 ### Minor Changes
