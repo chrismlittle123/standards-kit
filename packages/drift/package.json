@@ -1,6 +1,6 @@
 {
   "name": "@standards-kit/drift",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Detect when code or infrastructure drifts from your standards",
   "type": "module",
   "main": "dist/index.js",

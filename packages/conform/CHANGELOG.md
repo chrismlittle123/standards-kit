@@ -1,5 +1,11 @@
 # @standards-kit/conform
 
+## 0.3.1
+
+### Patch Changes
+
+- Rename MCP server from "cm-standards" to "standards"
+
 ## 0.3.0
 
 ### Minor Changes
