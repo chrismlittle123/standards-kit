@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- schema file contains all domain schemas and grows with features */
+ 
 import { minimatch } from "minimatch";
 import { z } from "zod";
 
@@ -64,12 +64,15 @@ function isValidGlobPattern(pattern: string): { valid: boolean; error?: string }
 /**
  * Zod schema for a valid glob pattern string
  */
-const globPatternSchema = z.string().refine(
-  (pattern) => isValidGlobPattern(pattern).valid,
-  (pattern) => ({
-    message: `Invalid glob pattern: "${pattern}" - ${isValidGlobPattern(pattern).error}`,
-  })
-);
+const globPatternSchema = z.string().superRefine((pattern, ctx) => {
+  const result = isValidGlobPattern(pattern);
+  if (!result.valid) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Invalid glob pattern: "${pattern}" - ${result.error}`,
+    });
+  }
+});
 
 /**
  * Zod schema for standards.toml configuration
@@ -284,13 +287,13 @@ const codeSecuritySchema = z
 const caseTypeSchema = z.enum(["kebab-case", "snake_case", "camelCase", "PascalCase"]);
 
 /** Helper to validate no duplicate values in array */
-const uniqueArraySchema = <T extends z.ZodTypeAny>(schema: T): z.ZodEffects<z.ZodArray<T>> =>
+const uniqueArraySchema = <T extends z.ZodTypeAny>(schema: T) =>
   z.array(schema).refine((arr) => new Set(arr).size === arr.length, {
     message: "Duplicate values not allowed",
   });
 
 /** Helper to validate no duplicate values in array with minimum length */
-const uniqueArraySchemaMin1 = <T extends z.ZodTypeAny>(schema: T): z.ZodEffects<z.ZodArray<T>> =>
+const uniqueArraySchemaMin1 = <T extends z.ZodTypeAny>(schema: T) =>
   z
     .array(schema)
     .min(1, "At least one value is required")

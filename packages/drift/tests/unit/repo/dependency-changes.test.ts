@@ -6,8 +6,8 @@ import { execSync } from "child_process";
 import {
   detectDependencyChanges,
   getTrackedDependencyFiles,
-} from "./dependency-changes.js";
-import type { GetDependenciesResult } from "./dependencies.js";
+} from "../../../src/repo/dependency-changes.js";
+import type { GetDependenciesResult } from "../../../src/repo/dependencies.js";
 
 describe("dependency-changes", () => {
   let testDir: string;

@@ -3,7 +3,7 @@ import { execSync } from "child_process";
 import {
   detectMissingProjects,
   detectAllProjects,
-} from "./project-detection.js";
+} from "../../../src/repo/project-detection.js";
 
 // Mock child_process
 vi.mock("child_process", () => ({

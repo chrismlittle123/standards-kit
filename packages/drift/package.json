@@ -49,7 +49,7 @@
   },
   "homepage": "https://github.com/chrismlittle123/standards-kit/tree/main/packages/drift#readme",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "@standards-kit/conform": "workspace:*",

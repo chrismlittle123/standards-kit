@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- registry config merging requires many type-safe merge functions */
+ 
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -191,7 +191,7 @@ export function loadRuleset(registryDir: string, rulesetName: string): Config {
 
   const result = configSchema.safeParse(parsed);
   if (!result.success) {
-    const errors = result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
+    const errors = result.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
     throw new ConfigError(`Invalid ruleset ${rulesetName}: ${errors}`);
   }
 
@@ -481,7 +481,7 @@ function mergeCodeownersConfig(
   };
 }
 
-// eslint-disable-next-line complexity -- docs config has many optional fields requiring individual merge
+ 
 function mergeDocsConfig(
   base: ProcessConfig["docs"],
   override: ProcessConfig["docs"]
@@ -507,7 +507,7 @@ function mergeDocsConfig(
   };
 }
 
-// eslint-disable-next-line complexity -- merging all process config sections requires multiple calls
+ 
 function mergeProcessSection(
   base: ProcessConfig | undefined,
   override: ProcessConfig

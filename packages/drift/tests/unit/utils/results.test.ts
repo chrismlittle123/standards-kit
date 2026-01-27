@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createEmptyResults, createEmptyOrgSummary } from "./results.js";
+import { createEmptyResults, createEmptyOrgSummary } from "../../../src/utils/results.js";
 
 describe("results utilities", () => {
   describe("createEmptyResults", () => {

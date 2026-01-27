@@ -62,7 +62,7 @@ export function validateGuidelinesDir(dirPath: string): GuidelineValidationResul
       result.invalidCount++;
       result.errors.push({
         file,
-        errors: parseResult.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
+        errors: parseResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`),
       });
     }
   }

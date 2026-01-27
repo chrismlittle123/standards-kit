@@ -7,7 +7,7 @@ import {
   clearDependencyCache,
   isCmInstalled,
   parseCmOutput,
-} from "./dependencies.js";
+} from "../../../src/repo/dependencies.js";
 
 /**
  * Check if an error is a network-related, external service, or environment failure.

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { execSync } from "child_process";
-import { validateTierRuleset, hasTierMismatch } from "./tier-validation.js";
+import { validateTierRuleset, hasTierMismatch } from "../../../src/repo/tier-validation.js";
 
 // Mock child_process
 vi.mock("child_process", () => ({

@@ -104,7 +104,7 @@ function parseTomlFile(filePath: string): unknown {
 function validateConfig(rawConfig: unknown): Config {
   const result = configSchema.safeParse(rawConfig);
   if (!result.success) {
-    const errors = result.error.errors
+    const errors = result.error.issues
       .map((e) => `  - ${e.path.join(".")}: ${e.message}`)
       .join("\n");
     throw new ConfigError(`Invalid ${CONFIG_FILE_NAME} configuration:\n${errors}`);

@@ -69,7 +69,7 @@ function findBranchRuleset(
 }
 
 /** Validate rulesets against config */
-// eslint-disable-next-line complexity
+ 
 export function validateRulesets(
   rulesets: RulesetResponse[],
   repoConfig: NonNullable<Config["process"]>["repo"]
@@ -127,7 +127,7 @@ function validateBranchRuleset(
 }
 
 /** Validate pull request rule settings */
-// eslint-disable-next-line complexity
+ 
 function validatePullRequestRule(
   prRule: RulesetRule | undefined,
   config: RulesetConfig,
@@ -174,7 +174,7 @@ function validatePullRequestRule(
 }
 
 /** Validate status checks rule settings */
-// eslint-disable-next-line complexity
+ 
 function validateStatusChecksRule(
   statusRule: RulesetRule | undefined,
   config: RulesetConfig,

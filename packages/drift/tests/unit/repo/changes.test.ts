@@ -9,12 +9,12 @@ import {
   detectCheckTomlChanges,
   getCheckTomlFilesAtCommit,
   compareCheckTomlFiles,
-} from "./changes.js";
+} from "../../../src/repo/changes.js";
 import {
   getRecentCommits,
   getChangedFilesInCommits,
   detectRecentChanges,
-} from "./recent-changes.js";
+} from "../../../src/repo/recent-changes.js";
 
 describe("change tracking", () => {
   let testDir: string;

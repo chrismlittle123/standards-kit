@@ -7,7 +7,7 @@ import {
   generateFileDiff,
   generateMultipleDiffs,
   formatDiffForMarkdown,
-} from "./diff.js";
+} from "../../../src/repo/diff.js";
 
 describe("diff", () => {
   let testDir: string;

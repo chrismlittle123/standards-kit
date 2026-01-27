@@ -9,7 +9,7 @@ import {
   formatDependencyChangesIssueBody,
   getDependencyChangesIssueTitle,
   getDependencyChangesIssueLabel,
-} from "./issue-formatter.js";
+} from "../../../src/github/issue-formatter.js";
 import type {
   MissingProjectsDetection,
   TierMismatchDetection,

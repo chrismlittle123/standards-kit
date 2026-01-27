@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
-import * as client from "./client.js";
-import * as repoChecks from "./repo-checks.js";
+import * as client from "../../../src/github/client.js";
+import * as repoChecks from "../../../src/github/repo-checks.js";
 
 describe("process-repo-discovery", () => {
   const mockListRepos = vi.spyOn(client, "listRepos");
@@ -20,7 +20,7 @@ describe("process-repo-discovery", () => {
   describe("discoverProcessRepos", () => {
     it("returns repos that have standards.toml", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       // Mock org with 3 repos, only 2 have standards.toml
       mockListRepos.mockResolvedValueOnce({
@@ -72,7 +72,7 @@ describe("process-repo-discovery", () => {
 
     it("returns empty array when no repos have standards.toml", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       mockListRepos.mockResolvedValueOnce({
         repos: [
@@ -102,7 +102,7 @@ describe("process-repo-discovery", () => {
 
     it("returns empty result when org has no repos", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       mockListRepos.mockResolvedValueOnce({
         repos: [],
@@ -123,7 +123,7 @@ describe("process-repo-discovery", () => {
 
     it("works with user accounts (not orgs)", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       mockListRepos.mockResolvedValueOnce({
         repos: [
@@ -152,7 +152,7 @@ describe("process-repo-discovery", () => {
 
     it("calls onProgress callback during discovery", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       mockListRepos.mockResolvedValueOnce({
         repos: [
@@ -193,7 +193,7 @@ describe("process-repo-discovery", () => {
 
     it("respects concurrency limit", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       // Create 10 repos to test concurrency limiting
       const repos = Array.from({ length: 10 }, (_, i) => ({
@@ -235,7 +235,7 @@ describe("process-repo-discovery", () => {
 
     it("filters repos by recent commit activity by default", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       mockListRepos.mockResolvedValueOnce({
         repos: [
@@ -280,7 +280,7 @@ describe("process-repo-discovery", () => {
 
     it("respects custom sinceHours parameter", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       mockListRepos.mockResolvedValueOnce({
         repos: [
@@ -316,7 +316,7 @@ describe("process-repo-discovery", () => {
 
     it("calls onActivityProgress callback during activity filtering", async () => {
       const { discoverProcessRepos } =
-        await import("./process-repo-discovery.js");
+        await import("../../../src/github/process-repo-discovery.js");
 
       mockListRepos.mockResolvedValueOnce({
         repos: [

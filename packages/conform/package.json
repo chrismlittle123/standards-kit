@@ -21,7 +21,10 @@
     "build": "tsup && tsc --emitDeclarationOnly",
     "dev": "tsup --watch",
     "start": "node dist/cli.js",
-    "test": "echo 'No tests yet' && exit 0",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
@@ -47,7 +50,7 @@
   },
   "homepage": "https://github.com/chrismlittle123/standards-kit/tree/main/packages/conform#readme",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.974.0",
@@ -76,13 +79,14 @@
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.1.1",
-    "zod": "^3.24.1",
-    "zod-to-json-schema": "^3.25.1"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.9",
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.8"
   }
 }

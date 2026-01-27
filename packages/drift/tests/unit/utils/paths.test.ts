@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { resolve, sep } from "path";
-import { safeJoinPath, PathTraversalError } from "./paths.js";
+import { safeJoinPath, PathTraversalError } from "../../../src/utils/paths.js";
 
 describe("path utilities", () => {
   describe("PathTraversalError", () => {
