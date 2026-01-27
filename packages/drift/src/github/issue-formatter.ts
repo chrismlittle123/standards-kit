@@ -141,7 +141,7 @@ export function formatTierMismatchIssueBody(
     "- Missing security or quality checks appropriate for the tier\n",
     "**To fix:**\n",
     `1. Update \`standards.toml\` to use a ruleset matching \`${detection.expectedPattern}\``,
-    "2. Or update `repo-metadata.yaml` tier if the current rulesets are correct",
+    "2. Or update `standards.toml` `[metadata].tier` if the current rulesets are correct",
     "3. Close this issue once the mismatch is resolved\n",
     "---\n_Created by drift-toolkit_",
   ];

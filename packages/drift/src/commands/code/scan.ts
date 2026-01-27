@@ -32,10 +32,10 @@ export interface ScanOptions {
 function validateRepoFiles(targetPath: string): string[] {
   const warnings: string[] = [];
 
-  // Check for repo-metadata.yaml
+  // Check for metadata (standards.toml [metadata])
   if (!hasMetadata(targetPath)) {
     warnings.push(
-      "repo-metadata.yaml not found. Create this file to define tier and team."
+      "No metadata found. Add a [metadata] section to standards.toml to define tier and project."
     );
   } else {
     // Check for empty metadata (has file but no content)

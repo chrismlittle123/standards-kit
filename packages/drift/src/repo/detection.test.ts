@@ -3,9 +3,8 @@ import { mkdirSync, writeFileSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import {
-  findMetadataPath,
-  parseRepoMetadata,
   getRepoMetadata,
+  extractMetadataFromToml,
   findCheckTomlFiles,
   hasCheckToml,
   hasMetadata,
@@ -29,94 +28,60 @@ describe("repo detection", () => {
     rmSync(testDir, { recursive: true, force: true });
   });
 
-  describe("findMetadataPath", () => {
-    it("returns null when no metadata file exists", () => {
-      expect(findMetadataPath(testDir)).toBeNull();
+  describe("extractMetadataFromToml", () => {
+    it("returns null when standards.toml does not exist", () => {
+      expect(extractMetadataFromToml(testDir)).toBeNull();
     });
 
-    it("finds repo-metadata.yaml", () => {
-      writeFileSync(join(testDir, "repo-metadata.yaml"), "tier: production");
-      expect(findMetadataPath(testDir)).toBe(
-        join(testDir, "repo-metadata.yaml")
+    it("returns null when standards.toml has no [metadata] section", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[code.linting.eslint]\nenabled = true'
       );
+      expect(extractMetadataFromToml(testDir)).toBeNull();
     });
 
-    it("finds repo-metadata.yml", () => {
-      writeFileSync(join(testDir, "repo-metadata.yml"), "tier: production");
-      expect(findMetadataPath(testDir)).toBe(
-        join(testDir, "repo-metadata.yml")
+    it("returns null when [metadata] has no tier", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\nproject = "backend"'
       );
+      expect(extractMetadataFromToml(testDir)).toBeNull();
     });
 
-    it("prefers .yaml over .yml", () => {
-      writeFileSync(join(testDir, "repo-metadata.yaml"), "tier: production");
-      writeFileSync(join(testDir, "repo-metadata.yml"), "tier: internal");
-      expect(findMetadataPath(testDir)).toBe(
-        join(testDir, "repo-metadata.yaml")
+    it("extracts metadata from standards.toml [metadata] section", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "production"\nproject = "backend"\norganisation = "acme"\nstatus = "active"'
       );
-    });
-  });
-
-  describe("parseRepoMetadata", () => {
-    it("returns defaults with warning for invalid YAML", () => {
-      const result = parseRepoMetadata("{{invalid");
-      expect(result).not.toBeNull();
-      expect(result?.metadata.tier).toBe("internal");
-      expect(result?.metadata.status).toBe("active");
-      expect(result?.warnings).toHaveLength(1);
-      expect(result?.warnings[0]).toContain("Failed to parse YAML");
-    });
-
-    it("returns defaults with warning for non-object YAML", () => {
-      const result = parseRepoMetadata("just a string");
-      expect(result).not.toBeNull();
-      expect(result?.metadata.tier).toBe("internal");
-      expect(result?.metadata.status).toBe("active");
-      expect(result?.warnings).toHaveLength(1);
-      expect(result?.warnings[0]).toContain("Invalid metadata format");
-    });
-
-    it("returns defaults with warning for empty file", () => {
-      const result = parseRepoMetadata("");
-      expect(result).not.toBeNull();
-      expect(result?.metadata.tier).toBe("internal");
-      expect(result?.metadata.status).toBe("active");
-      expect(result?.warnings).toHaveLength(1);
-      expect(result?.warnings[0]).toContain("File is empty");
-    });
-
-    it("returns defaults with warning for whitespace-only file", () => {
-      const result = parseRepoMetadata("   \n\t\n   ");
-      expect(result).not.toBeNull();
-      expect(result?.metadata.tier).toBe("internal");
-      expect(result?.metadata.status).toBe("active");
-      expect(result?.warnings).toHaveLength(1);
-      expect(result?.warnings[0]).toContain("File is empty");
-    });
-
-    it("parses valid metadata with all fields", () => {
-      const result = parseRepoMetadata(`
-tier: production
-status: active
-team: backend
-`);
+      const result = extractMetadataFromToml(testDir);
       expect(result).not.toBeNull();
       expect(result?.metadata.tier).toBe("production");
+      expect(result?.metadata.project).toBe("backend");
+      expect(result?.metadata.organisation).toBe("acme");
       expect(result?.metadata.status).toBe("active");
-      expect(result?.metadata.team).toBe("backend");
       expect(result?.warnings).toHaveLength(0);
     });
 
-    it("applies defaults for missing fields", () => {
-      const result = parseRepoMetadata("team: frontend");
+    it("applies defaults for missing optional fields", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "internal"'
+      );
+      const result = extractMetadataFromToml(testDir);
       expect(result).not.toBeNull();
       expect(result?.metadata.tier).toBe("internal");
-      expect(result?.metadata.status).toBe("active");
-      expect(result?.metadata.team).toBe("frontend");
+      expect(result?.metadata.project).toBeUndefined();
+      expect(result?.metadata.organisation).toBeUndefined();
+      expect(result?.metadata.status).toBe("active"); // default
     });
 
     it("warns about invalid tier", () => {
-      const result = parseRepoMetadata("tier: invalid-tier");
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "invalid-tier"'
+      );
+      const result = extractMetadataFromToml(testDir);
       expect(result).not.toBeNull();
       expect(result?.metadata.tier).toBe("internal"); // default
       expect(result?.warnings).toHaveLength(1);
@@ -124,36 +89,44 @@ team: backend
     });
 
     it("warns about invalid status", () => {
-      const result = parseRepoMetadata("status: invalid-status");
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "production"\nstatus = "invalid-status"'
+      );
+      const result = extractMetadataFromToml(testDir);
       expect(result).not.toBeNull();
       expect(result?.metadata.status).toBe("active"); // default
       expect(result?.warnings).toHaveLength(1);
       expect(result?.warnings[0]).toContain("Invalid status");
     });
 
-    it("preserves raw metadata", () => {
-      const result = parseRepoMetadata(`
-tier: production
-custom_field: custom_value
-`);
-      expect(result?.metadata.raw).toEqual({
-        tier: "production",
-        custom_field: "custom_value",
-      });
+    it("returns null for invalid TOML", () => {
+      writeFileSync(join(testDir, "standards.toml"), "invalid toml {{");
+      expect(extractMetadataFromToml(testDir)).toBeNull();
     });
   });
 
   describe("getRepoMetadata", () => {
-    it("returns { metadata: null, warnings: [] } when no metadata file exists", () => {
+    it("returns { metadata: null, warnings: [] } when no standards.toml exists", () => {
       const result = getRepoMetadata(testDir);
       expect(result.metadata).toBeNull();
       expect(result.warnings).toEqual([]);
     });
 
-    it("loads and parses metadata file", () => {
+    it("returns { metadata: null, warnings: [] } when standards.toml has no [metadata]", () => {
       writeFileSync(
-        join(testDir, "repo-metadata.yaml"),
-        "tier: production\nstatus: pre-release"
+        join(testDir, "standards.toml"),
+        '[code.linting.eslint]\nenabled = true'
+      );
+      const result = getRepoMetadata(testDir);
+      expect(result.metadata).toBeNull();
+      expect(result.warnings).toEqual([]);
+    });
+
+    it("loads and parses metadata from standards.toml [metadata]", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "production"\nstatus = "pre-release"'
       );
       const result = getRepoMetadata(testDir);
       expect(result.metadata).not.toBeNull();
@@ -161,25 +134,16 @@ custom_field: custom_value
       expect(result.metadata?.status).toBe("pre-release");
     });
 
-    it("returns defaults with warning for empty metadata file", () => {
-      writeFileSync(join(testDir, "repo-metadata.yaml"), "");
-      const result = getRepoMetadata(testDir);
-      expect(result.metadata).not.toBeNull();
-      expect(result.metadata?.tier).toBe("internal");
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain("File is empty");
-    });
-
-    it("returns defaults with warning for invalid YAML in metadata file", () => {
+    it("returns warnings for invalid tier", () => {
       writeFileSync(
-        join(testDir, "repo-metadata.yaml"),
-        "tier: production\n  bad: yaml"
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "invalid"'
       );
       const result = getRepoMetadata(testDir);
       expect(result.metadata).not.toBeNull();
-      expect(result.metadata?.tier).toBe("internal");
+      expect(result.metadata?.tier).toBe("internal"); // default
       expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain("Failed to parse YAML");
+      expect(result.warnings[0]).toContain("Invalid tier");
     });
   });
 
@@ -261,18 +225,37 @@ custom_field: custom_value
   });
 
   describe("hasMetadata", () => {
-    it("returns false when no metadata file exists", () => {
+    it("returns false when no standards.toml exists", () => {
       expect(hasMetadata(testDir)).toBe(false);
     });
 
-    it("returns true when repo-metadata.yaml exists", () => {
-      writeFileSync(join(testDir, "repo-metadata.yaml"), "tier: production");
+    it("returns true when standards.toml has [metadata] section", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "production"'
+      );
       expect(hasMetadata(testDir)).toBe(true);
+    });
+
+    it("returns false when standards.toml exists but has no [metadata]", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[code.linting.eslint]\nenabled = true'
+      );
+      expect(hasMetadata(testDir)).toBe(false);
+    });
+
+    it("returns false when [metadata] exists but has no tier", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\nproject = "backend"'
+      );
+      expect(hasMetadata(testDir)).toBe(false);
     });
   });
 
   describe("isScannableRepo", () => {
-    it("returns not scannable when both files are missing", () => {
+    it("returns not scannable when no files exist", () => {
       const result = isScannableRepo(testDir);
       expect(result.scannable).toBe(false);
       expect(result.hasMetadata).toBe(false);
@@ -281,16 +264,7 @@ custom_field: custom_value
       expect(result.metadata).toBeUndefined();
     });
 
-    it("returns not scannable when only metadata exists", () => {
-      writeFileSync(join(testDir, "repo-metadata.yaml"), "tier: production");
-      const result = isScannableRepo(testDir);
-      expect(result.scannable).toBe(false);
-      expect(result.hasMetadata).toBe(true);
-      expect(result.hasCheckToml).toBe(false);
-      expect(result.metadata).toBeDefined();
-    });
-
-    it("returns not scannable when only standards.toml exists", () => {
+    it("returns not scannable when only standards.toml exists without [metadata]", () => {
       writeFileSync(join(testDir, "standards.toml"), "[code]");
       const result = isScannableRepo(testDir);
       expect(result.scannable).toBe(false);
@@ -299,28 +273,29 @@ custom_field: custom_value
       expect(result.checkTomlPaths).toEqual(["standards.toml"]);
     });
 
-    it("returns scannable when both files exist", () => {
+    it("returns scannable when standards.toml has [metadata] section", () => {
       writeFileSync(
-        join(testDir, "repo-metadata.yaml"),
-        "tier: production\nstatus: active"
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "production"\n[code]'
       );
-      writeFileSync(join(testDir, "standards.toml"), "[code]");
       const result = isScannableRepo(testDir);
       expect(result.scannable).toBe(true);
       expect(result.hasMetadata).toBe(true);
       expect(result.hasCheckToml).toBe(true);
-      expect(result.checkTomlPaths).toEqual(["standards.toml"]);
       expect(result.metadata?.tier).toBe("production");
-      expect(result.metadata?.status).toBe("active");
     });
 
-    it("returns scannable for monorepo with standards.toml in subdirectory", () => {
-      writeFileSync(join(testDir, "repo-metadata.yaml"), "tier: internal");
+    it("returns scannable for monorepo with standards.toml [metadata] at root", () => {
+      writeFileSync(
+        join(testDir, "standards.toml"),
+        '[metadata]\ntier = "internal"'
+      );
       mkdirSync(join(testDir, "packages", "api"), { recursive: true });
       writeFileSync(join(testDir, "packages", "api", "standards.toml"), "[code]");
 
       const result = isScannableRepo(testDir);
       expect(result.scannable).toBe(true);
+      expect(result.checkTomlPaths).toContain("standards.toml");
       expect(result.checkTomlPaths).toContain(
         join("packages", "api", "standards.toml")
       );

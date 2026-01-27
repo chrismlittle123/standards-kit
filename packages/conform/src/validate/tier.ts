@@ -1,14 +1,11 @@
-import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
 import TOML from "@iarna/toml";
 import chalk from "chalk";
-import * as yaml from "js-yaml";
 
-import { findConfigFile, getProjectRoot } from "../core/index.js";
+import { findConfigFile } from "../core/index.js";
 import {
-  type RepoMetadata,
   type Tier,
   type TierSourceDetail,
   VALID_TIERS,
@@ -25,80 +22,26 @@ interface ExtendsConfig {
   rulesets?: string[];
 }
 
+/** Metadata section from standards.toml */
+interface MetadataConfig {
+  tier?: Tier;
+  project?: string;
+  organisation?: string;
+  status?: string;
+}
+
 /** Raw standards.toml structure (just what we need) */
 interface RawConfig {
+  metadata?: MetadataConfig;
   extends?: ExtendsConfig;
 }
 
-/** Result of loading repo-metadata.yaml with detailed source info */
-interface LoadMetadataResult {
-  metadata: RepoMetadata | null;
+/** Result of getTier with detailed info */
+interface GetTierResult {
+  tier: Tier;
+  source: "standards.toml" | "default";
   sourceDetail: TierSourceDetail;
-  parseError?: string;
-}
-
-/**
- * Find the git repository root directory
- */
-function findGitRoot(startDir: string): string | null {
-  try {
-    const gitRoot = execSync("git rev-parse --show-toplevel", {
-      cwd: startDir,
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
-    return gitRoot;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Read file content, returns null if file doesn't exist or can't be read
- */
-function readFileContent(filePath: string): string | null {
-  if (!fs.existsSync(filePath)) {
-    return null;
-  }
-  try {
-    return fs.readFileSync(filePath, "utf-8");
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Parse YAML content into RepoMetadata
- */
-function parseYamlContent(content: string): LoadMetadataResult {
-  try {
-    const parsed: unknown = yaml.load(content);
-    // yaml.load returns undefined for empty content, null for "null"
-    if (parsed === undefined || parsed === null) {
-      return { metadata: null, sourceDetail: "default (file empty)" };
-    }
-    return { metadata: parsed as RepoMetadata, sourceDetail: "repo-metadata.yaml" };
-  } catch (error) {
-    const parseError = error instanceof Error ? error.message : String(error);
-    return { metadata: null, sourceDetail: "default (parse error)", parseError };
-  }
-}
-
-/**
- * Load and parse repo-metadata.yaml with detailed error tracking
- */
-function loadRepoMetadata(projectRoot: string): LoadMetadataResult {
-  const metadataPath = path.join(projectRoot, "repo-metadata.yaml");
-  const content = readFileContent(metadataPath);
-
-  if (content === null) {
-    return { metadata: null, sourceDetail: "default (file not found)" };
-  }
-  if (!content.trim()) {
-    return { metadata: null, sourceDetail: "default (file empty)" };
-  }
-
-  return parseYamlContent(content);
+  invalidValue?: string;
 }
 
 /**
@@ -114,43 +57,58 @@ function loadExtendsConfig(configPath: string): ExtendsConfig | null {
   }
 }
 
-/** Result of getTier with detailed info */
-interface GetTierResult {
-  tier: Tier;
-  source: "repo-metadata.yaml" | "default";
-  sourceDetail: TierSourceDetail;
-  invalidValue?: string;
-}
-
 /**
- * Get tier from repo-metadata.yaml with validation
+ * Load tier from standards.toml [metadata] section
  */
-function getTier(metadataResult: LoadMetadataResult): GetTierResult {
-  const { metadata, sourceDetail } = metadataResult;
-
-  // If metadata loading failed, return with the detailed reason
-  if (!metadata) {
-    return { tier: DEFAULT_TIER, source: "default", sourceDetail };
-  }
-
-  // Metadata exists but tier key is missing
-  if (metadata.tier === undefined) {
-    return { tier: DEFAULT_TIER, source: "default", sourceDetail: "default (tier not specified)" };
-  }
-
-  const tier = metadata.tier;
-
-  // Check if tier value is valid
-  if (!VALID_TIERS.includes(tier)) {
+function loadTierFromStandardsToml(configPath: string): GetTierResult {
+  if (!fs.existsSync(configPath)) {
     return {
       tier: DEFAULT_TIER,
       source: "default",
-      sourceDetail: "default (invalid value)",
-      invalidValue: String(tier),
+      sourceDetail: "default (file not found)",
     };
   }
 
-  return { tier, source: "repo-metadata.yaml", sourceDetail: "repo-metadata.yaml" };
+  try {
+    const content = fs.readFileSync(configPath, "utf-8");
+    const parsed = TOML.parse(content) as RawConfig;
+
+    if (!parsed.metadata) {
+      return {
+        tier: DEFAULT_TIER,
+        source: "default",
+        sourceDetail: "default (no metadata)",
+      };
+    }
+
+    if (parsed.metadata.tier === undefined) {
+      return {
+        tier: DEFAULT_TIER,
+        source: "default",
+        sourceDetail: "default (tier not specified)",
+      };
+    }
+
+    const tier = parsed.metadata.tier;
+
+    // Check if tier value is valid
+    if (!VALID_TIERS.includes(tier)) {
+      return {
+        tier: DEFAULT_TIER,
+        source: "default",
+        sourceDetail: "default (invalid value)",
+        invalidValue: String(tier),
+      };
+    }
+
+    return { tier, source: "standards.toml", sourceDetail: "standards.toml" };
+  } catch {
+    return {
+      tier: DEFAULT_TIER,
+      source: "default",
+      sourceDetail: "default (file not found)",
+    };
+  }
 }
 
 /**
@@ -180,6 +138,7 @@ function createNotFoundResult(): ValidateTierResult {
     valid: false,
     tier: DEFAULT_TIER,
     tierSource: "default",
+    tierSourceDetail: "default (file not found)",
     rulesets: [],
     expectedPattern: `*-${DEFAULT_TIER}`,
     matchedRulesets: [],
@@ -190,7 +149,7 @@ function createNotFoundResult(): ValidateTierResult {
 /** Options for building the result */
 interface BuildResultOptions {
   tier: Tier;
-  source: "repo-metadata.yaml" | "default";
+  source: "standards.toml" | "default";
   sourceDetail: TierSourceDetail;
   rulesets: string[];
   matchedRulesets: string[];
@@ -198,7 +157,6 @@ interface BuildResultOptions {
   hasEmptyRulesets?: boolean;
   registryUrl?: string;
   warnings?: string[];
-  parseError?: string;
 }
 
 /**
@@ -214,7 +172,6 @@ function buildResult(options: BuildResultOptions): ValidateTierResult {
     invalidTierValue,
     hasEmptyRulesets,
     registryUrl,
-    parseError,
   } = options;
   const warnings: string[] = options.warnings ?? [];
 
@@ -224,13 +181,8 @@ function buildResult(options: BuildResultOptions): ValidateTierResult {
   // Add warning for invalid tier value
   if (invalidTierValue) {
     warnings.push(
-      `Invalid tier '${invalidTierValue}' in repo-metadata.yaml. Valid values are: ${VALID_TIERS.join(", ")}`
+      `Invalid tier '${invalidTierValue}' in standards.toml [metadata]. Valid values are: ${VALID_TIERS.join(", ")}`
     );
-  }
-
-  // Add warning for parse error
-  if (parseError) {
-    warnings.push(`Failed to parse repo-metadata.yaml: ${parseError}`);
   }
 
   // Add warning for empty rulesets with registry configured
@@ -261,6 +213,9 @@ function buildResult(options: BuildResultOptions): ValidateTierResult {
 /**
  * Validate that project tier matches its rulesets.
  * This is the programmatic API exported for library consumers.
+ *
+ * Tier is loaded from standards.toml [metadata].tier
+ * Defaults to "internal" if not specified
  */
 export function validateTierRuleset(options: ValidateTierOptions = {}): ValidateTierResult {
   const configPath = resolveConfigPath(options);
@@ -268,32 +223,25 @@ export function validateTierRuleset(options: ValidateTierOptions = {}): Validate
     return createNotFoundResult();
   }
 
-  // Try to find repo-metadata.yaml from git root first, fall back to config directory
-  const configDir = getProjectRoot(configPath);
-  const gitRoot = findGitRoot(configDir);
-  const metadataSearchPath = gitRoot ?? configDir;
-
-  const metadataResult = loadRepoMetadata(metadataSearchPath);
-  const { tier, source, sourceDetail, invalidValue } = getTier(metadataResult);
+  const tierResult = loadTierFromStandardsToml(configPath);
 
   const extendsConfig = loadExtendsConfig(configPath);
   const rulesets = extendsConfig?.rulesets ?? [];
-  const matchedRulesets = rulesets.length > 0 ? findMatchingRulesets(rulesets, tier) : [];
+  const matchedRulesets = rulesets.length > 0 ? findMatchingRulesets(rulesets, tierResult.tier) : [];
 
   // Detect empty rulesets with registry configured
   const hasEmptyRulesets = extendsConfig !== null && rulesets.length === 0;
   const registryUrl = extendsConfig?.registry;
 
   return buildResult({
-    tier,
-    source,
-    sourceDetail,
+    tier: tierResult.tier,
+    source: tierResult.source,
+    sourceDetail: tierResult.sourceDetail,
     rulesets,
     matchedRulesets,
-    invalidTierValue: invalidValue,
+    invalidTierValue: tierResult.invalidValue,
     hasEmptyRulesets,
     registryUrl,
-    parseError: metadataResult.parseError,
   });
 }
 
@@ -333,7 +281,7 @@ function formatFailedValidation(result: ValidateTierResult, sourceDisplay: strin
     lines.push("");
     lines.push(
       chalk.cyan(
-        `  Hint: Update repo-metadata.yaml to use a valid tier value: ${VALID_TIERS.join(", ")}`
+        `  Hint: Update standards.toml [metadata].tier to use a valid value: ${VALID_TIERS.join(", ")}`
       )
     );
   }

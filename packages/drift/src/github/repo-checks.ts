@@ -42,25 +42,50 @@ export async function fileExists(
 }
 
 /**
- * Check if a repository is scannable (has required metadata files).
- * A repo is scannable if it has BOTH:
- * - repo-metadata.yaml (or .yml variant)
- * - standards.toml
+ * Check if a repository has a [metadata] section in its standards.toml.
+ * Uses GitHub API to fetch and parse the file.
+ */
+export async function hasRemoteMetadataConfig(
+  org: string,
+  repo: string,
+  token?: string
+): Promise<boolean> {
+  const headers = buildApiHeaders(token);
+  headers.Accept = "application/vnd.github.raw+json";
+
+  try {
+    const response = await fetchWithRetry(
+      `${GITHUB_API.baseUrl}/repos/${org}/${repo}/contents/${FILE_PATTERNS.checkToml}`,
+      { headers },
+      token
+    );
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const content = await response.text();
+    const config = parseToml(content) as Record<string, unknown>;
+    const metadataConfig = config.metadata as Record<string, unknown> | undefined;
+
+    // Check if [metadata] section exists with a tier
+    return metadataConfig?.tier !== undefined;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if a repository is scannable (has required metadata).
+ * A repo is scannable if it has standards.toml with [metadata] section.
  */
 export async function isRepoScannable(
   org: string,
   repo: string,
   token?: string
 ): Promise<boolean> {
-  // Check for any metadata file variant in parallel
-  const metadataResults = await Promise.all(
-    FILE_PATTERNS.metadata.map((file) => fileExists(org, repo, file, token))
-  );
-  if (!metadataResults.some((exists) => exists)) {
-    return false;
-  }
-  // Check for standards.toml
-  return fileExists(org, repo, FILE_PATTERNS.checkToml, token);
+  // Check if standards.toml exists and has [metadata] section
+  return hasRemoteMetadataConfig(org, repo, token);
 }
 
 /**

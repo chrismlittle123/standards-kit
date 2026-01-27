@@ -9,23 +9,15 @@ export type Tier = "production" | "internal" | "prototype";
 export const VALID_TIERS: readonly Tier[] = ["production", "internal", "prototype"];
 
 /**
- * Parsed repo-metadata.yaml structure
- */
-export interface RepoMetadata {
-  tier?: Tier;
-}
-
-/**
  * Detailed tier source indicating why a default was used
  */
 export type TierSourceDetail =
-  | "repo-metadata.yaml" // Tier was read from file
+  | "standards.toml" // Tier was read from [metadata] section
   | "default" // Generic default (for backwards compatibility)
-  | "default (file not found)" // File doesn't exist
-  | "default (file empty)" // File exists but is empty
-  | "default (parse error)" // File exists but YAML is invalid
-  | "default (tier not specified)" // File valid but no tier key
-  | "default (invalid value)"; // File has tier but value is invalid
+  | "default (file not found)" // standards.toml doesn't exist
+  | "default (no metadata)" // standards.toml exists but no [metadata] section
+  | "default (tier not specified)" // [metadata] exists but no tier key
+  | "default (invalid value)"; // [metadata] has tier but value is invalid
 
 /**
  * Options for the tier validation command
@@ -43,10 +35,10 @@ export interface ValidateTierOptions {
 export interface ValidateTierResult {
   /** Whether validation passed */
   valid: boolean;
-  /** Project tier from repo-metadata.yaml (defaults to "internal") */
+  /** Project tier from standards.toml [metadata] (defaults to "internal") */
   tier: Tier;
   /** Source of tier value */
-  tierSource: "repo-metadata.yaml" | "default";
+  tierSource: "standards.toml" | "default";
   /** Detailed source of tier value with reason for default */
   tierSourceDetail?: TierSourceDetail;
   /** Rulesets from standards.toml extends section */

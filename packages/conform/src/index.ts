@@ -81,7 +81,6 @@ export {
 export {
   formatTierResultJson,
   formatTierResultText,
-  type RepoMetadata,
   type Tier,
   type TierSourceDetail,
   VALID_TIERS,

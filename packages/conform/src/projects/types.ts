@@ -7,7 +7,7 @@ export type { Tier } from "../validate/types.js";
 export type ProjectType = "typescript" | "python";
 
 /** Source of tier value */
-export type TierSource = "repo-metadata.yaml" | "default" | null;
+export type TierSource = "standards.toml" | "default" | null;
 
 /** Project marker file configuration */
 export interface ProjectMarker {
@@ -31,9 +31,9 @@ export interface DetectedProject {
 
 /** A project enriched with tier information */
 export interface EnrichedProject extends DetectedProject {
-  /** Tier from repo-metadata.yaml (undefined if no file exists) */
+  /** Tier from standards.toml [metadata] (undefined if not found) */
   tier?: Tier;
-  /** Source of tier value: repo-metadata.yaml, default, or null if no file */
+  /** Source of tier value: standards.toml, default, or null if not found */
   tierSource?: TierSource;
 }
 
@@ -55,7 +55,7 @@ export interface DetectOptions {
   registry?: string;
   /** Output format */
   format: "text" | "json";
-  /** Show tier/status from repo-metadata.yaml */
+  /** Show tier/status from standards.toml [metadata] */
   showStatus?: boolean;
   /** Filter to projects without standards.toml */
   missingConfig?: boolean;

@@ -471,77 +471,72 @@ describe("github client API functions", () => {
   });
 
   describe("isRepoScannable", () => {
-    it("returns true when both metadata and standards.toml exist", async () => {
+    it("returns true when standards.toml has [metadata] section with tier", async () => {
       const { isRepoScannable } = await import("./client.js");
 
-      // Mock: repo-metadata.yaml exists, standards.toml exists
-      mockFetchWithRetry
-        .mockResolvedValueOnce(new Response("{}", { status: 200 })) // repo-metadata.yaml
-        .mockResolvedValueOnce(new Response("{}", { status: 404 })) // repo-metadata.yml (not found)
-        .mockResolvedValueOnce(new Response("{}", { status: 200 })); // standards.toml
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\ntier = "production"', { status: 200 })
+      );
 
       const result = await isRepoScannable("test-org", "test-repo");
 
       expect(result).toBe(true);
+      expect(mockFetchWithRetry).toHaveBeenCalledTimes(1);
     });
 
-    it("returns true when repo-metadata.yml variant exists", async () => {
+    it("returns false when standards.toml does not exist", async () => {
       const { isRepoScannable } = await import("./client.js");
 
-      // Mock: repo-metadata.yaml not found, repo-metadata.yml exists, standards.toml exists
-      mockFetchWithRetry
-        .mockResolvedValueOnce(new Response("Not Found", { status: 404 })) // repo-metadata.yaml
-        .mockResolvedValueOnce(new Response("{}", { status: 200 })) // repo-metadata.yml
-        .mockResolvedValueOnce(new Response("{}", { status: 200 })); // standards.toml
-
-      const result = await isRepoScannable("test-org", "test-repo");
-
-      expect(result).toBe(true);
-    });
-
-    it("returns false when metadata file is missing", async () => {
-      const { isRepoScannable } = await import("./client.js");
-
-      // Mock: neither metadata variant exists
-      mockFetchWithRetry
-        .mockResolvedValueOnce(new Response("Not Found", { status: 404 })) // repo-metadata.yaml
-        .mockResolvedValueOnce(new Response("Not Found", { status: 404 })); // repo-metadata.yml
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response("Not Found", { status: 404 })
+      );
 
       const result = await isRepoScannable("test-org", "test-repo");
 
       expect(result).toBe(false);
-      // Should not check for standards.toml since metadata is missing
-      expect(mockFetchWithRetry).toHaveBeenCalledTimes(2);
+      expect(mockFetchWithRetry).toHaveBeenCalledTimes(1);
     });
 
-    it("returns false when standards.toml is missing", async () => {
+    it("returns false when standards.toml has no [metadata] section", async () => {
       const { isRepoScannable } = await import("./client.js");
 
-      // Mock: metadata exists but standards.toml missing
-      mockFetchWithRetry
-        .mockResolvedValueOnce(new Response("{}", { status: 200 })) // repo-metadata.yaml
-        .mockResolvedValueOnce(new Response("{}", { status: 404 })) // repo-metadata.yml
-        .mockResolvedValueOnce(new Response("Not Found", { status: 404 })); // standards.toml
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[code.linting.eslint]\nenabled = true', { status: 200 })
+      );
 
       const result = await isRepoScannable("test-org", "test-repo");
 
       expect(result).toBe(false);
+      expect(mockFetchWithRetry).toHaveBeenCalledTimes(1);
     });
 
-    it("passes token to all file checks", async () => {
+    it("returns false when [metadata] exists but has no tier", async () => {
       const { isRepoScannable } = await import("./client.js");
 
-      mockFetchWithRetry
-        .mockResolvedValueOnce(new Response("{}", { status: 200 }))
-        .mockResolvedValueOnce(new Response("{}", { status: 404 }))
-        .mockResolvedValueOnce(new Response("{}", { status: 200 }));
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\nproject = "backend"', { status: 200 })
+      );
+
+      const result = await isRepoScannable("test-org", "test-repo");
+
+      expect(result).toBe(false);
+      expect(mockFetchWithRetry).toHaveBeenCalledTimes(1);
+    });
+
+    it("passes token to file check", async () => {
+      const { isRepoScannable } = await import("./client.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\ntier = "production"', { status: 200 })
+      );
 
       await isRepoScannable("test-org", "test-repo", "my-token");
 
-      // All calls should include the token
-      for (const call of mockFetchWithRetry.mock.calls) {
-        expect(call[2]).toBe("my-token");
-      }
+      expect(mockFetchWithRetry).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        "my-token"
+      );
     });
   });
 

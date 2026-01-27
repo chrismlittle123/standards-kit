@@ -49,26 +49,111 @@ describe("repo-checks", () => {
     });
   });
 
+  describe("hasRemoteMetadataConfig", () => {
+    it("returns true when standards.toml has [metadata] with tier", async () => {
+      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\ntier = "production"', { status: 200 })
+      );
+
+      const result = await hasRemoteMetadataConfig("test-org", "test-repo");
+
+      expect(result).toBe(true);
+    });
+
+    it("returns false when standards.toml has no [metadata] section", async () => {
+      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[code.linting.eslint]\nenabled = true', { status: 200 })
+      );
+
+      const result = await hasRemoteMetadataConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when [metadata] has no tier", async () => {
+      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\nteam = "backend"', { status: 200 })
+      );
+
+      const result = await hasRemoteMetadataConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when standards.toml does not exist", async () => {
+      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response("Not Found", { status: 404 })
+      );
+
+      const result = await hasRemoteMetadataConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false for invalid TOML", async () => {
+      const { hasRemoteMetadataConfig } = await import("./repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response("invalid toml {{", { status: 200 })
+      );
+
+      const result = await hasRemoteMetadataConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+  });
+
   describe("isRepoScannable", () => {
-    it("returns true when both metadata and standards.toml exist", async () => {
+    it("returns true when standards.toml has [metadata] section with tier", async () => {
       const { isRepoScannable } = await import("./repo-checks.js");
 
-      mockFetchWithRetry
-        .mockResolvedValueOnce(new Response("{}", { status: 200 })) // repo-metadata.yaml
-        .mockResolvedValueOnce(new Response("{}", { status: 404 })) // repo-metadata.yml
-        .mockResolvedValueOnce(new Response("{}", { status: 200 })); // standards.toml
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\ntier = "production"', { status: 200 })
+      );
 
       const result = await isRepoScannable("test-org", "test-repo");
 
       expect(result).toBe(true);
     });
 
-    it("returns false when metadata file is missing", async () => {
+    it("returns false when standards.toml does not exist", async () => {
       const { isRepoScannable } = await import("./repo-checks.js");
 
-      mockFetchWithRetry
-        .mockResolvedValueOnce(new Response("Not Found", { status: 404 }))
-        .mockResolvedValueOnce(new Response("Not Found", { status: 404 }));
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response("Not Found", { status: 404 })
+      );
+
+      const result = await isRepoScannable("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when standards.toml has no [metadata] section", async () => {
+      const { isRepoScannable } = await import("./repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[code.linting.eslint]\nenabled = true', { status: 200 })
+      );
+
+      const result = await isRepoScannable("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when [metadata] exists but has no tier", async () => {
+      const { isRepoScannable } = await import("./repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\nproject = "backend"', { status: 200 })
+      );
 
       const result = await isRepoScannable("test-org", "test-repo");
 

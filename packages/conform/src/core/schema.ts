@@ -730,6 +730,27 @@ const processSchema = z
   .optional();
 
 // =============================================================================
+// Metadata Configuration
+// =============================================================================
+
+/** Repository tier for standards enforcement level */
+const tierSchema = z.enum(["production", "internal", "prototype"]);
+
+/** Repository status indicating lifecycle phase */
+const statusSchema = z.enum(["active", "pre-release", "deprecated"]);
+
+/** Metadata configuration for repository tier, project, organisation, and status */
+const metadataSchema = z
+  .object({
+    tier: tierSchema,
+    project: z.string().optional(),
+    organisation: z.string().optional(),
+    status: statusSchema.optional().default("active"),
+  })
+  .strict()
+  .optional();
+
+// =============================================================================
 // Extends Configuration
 // =============================================================================
 
@@ -761,6 +782,7 @@ const monorepoSchema = z
 /** Full standards.toml schema */
 export const configSchema = z
   .object({
+    metadata: metadataSchema,
     extends: extendsSchema,
     code: codeSchema,
     process: processSchema,

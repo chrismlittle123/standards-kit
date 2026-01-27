@@ -1,7 +1,7 @@
 /** Repository detection utilities for drift-toolkit. */
 import { existsSync, readFileSync, readdirSync } from "fs";
 import { join, relative } from "path";
-import { parse as parseYaml } from "yaml";
+import { parse as parseToml } from "smol-toml";
 import { FILE_PATTERNS } from "../constants.js";
 import {
   validateAllCheckToml,
@@ -14,7 +14,8 @@ export type RepoStatus = "active" | "pre-release" | "deprecated";
 export interface RepoMetadata {
   tier: RepoTier;
   status: RepoStatus;
-  team?: string;
+  project?: string;
+  organisation?: string;
   raw: Record<string, unknown>;
 }
 
@@ -82,86 +83,85 @@ function extractStatus(
   return DEFAULTS.status;
 }
 
-function createDefaultResult(warning: string): {
-  metadata: RepoMetadata;
-  warnings: string[];
-} {
-  return {
-    metadata: {
-      tier: DEFAULTS.tier,
-      status: DEFAULTS.status,
-      team: undefined,
-      raw: {},
-    },
-    warnings: [warning],
+/** Raw standards.toml structure for metadata extraction */
+interface RawStandardsToml {
+  metadata?: {
+    tier?: string;
+    status?: string;
+    project?: string;
+    organisation?: string;
   };
 }
 
-export function findMetadataPath(repoPath: string): string | null {
-  for (const filename of FILE_PATTERNS.metadata) {
-    const metadataPath = join(repoPath, filename);
-    if (existsSync(metadataPath)) {
-      return metadataPath;
-    }
-  }
-  return null;
-}
-
-export function parseRepoMetadata(content: string): {
+/**
+ * Extract metadata from standards.toml [metadata] section.
+ * Returns null if no metadata section exists or file doesn't exist.
+ */
+export function extractMetadataFromToml(repoPath: string): {
   metadata: RepoMetadata;
   warnings: string[];
-} {
-  if (content.trim() === "") {
-    return createDefaultResult("File is empty, using default values");
+} | null {
+  const tomlPath = join(repoPath, FILE_PATTERNS.checkToml);
+  if (!existsSync(tomlPath)) {
+    return null;
   }
 
   try {
-    const parsed = parseYaml(content) as Record<string, unknown> | null;
-    if (!parsed || typeof parsed !== "object") {
-      const got = parsed === null ? "null" : typeof parsed;
-      return createDefaultResult(
-        `Invalid metadata format (expected object, got ${got}), using default values`
-      );
+    const content = readFileSync(tomlPath, "utf-8");
+    const parsed = parseToml(content) as RawStandardsToml;
+
+    if (!parsed.metadata) {
+      return null;
     }
+
+    // Require tier to be explicitly set in [metadata] section
+    if (parsed.metadata.tier === undefined) {
+      return null;
+    }
+
     const warnings: string[] = [];
-    const tier = extractTier(parsed, warnings);
-    const status = extractStatus(parsed, warnings);
-    const team = typeof parsed.team === "string" ? parsed.team : undefined;
-    return { metadata: { tier, status, team, raw: parsed }, warnings };
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return createDefaultResult(
-      `Failed to parse YAML: ${msg}, using default values`
+    const tier = extractTier(
+      parsed.metadata as Record<string, unknown>,
+      warnings
     );
+    const status = extractStatus(
+      parsed.metadata as Record<string, unknown>,
+      warnings
+    );
+    const project =
+      typeof parsed.metadata.project === "string"
+        ? parsed.metadata.project
+        : undefined;
+    const organisation =
+      typeof parsed.metadata.organisation === "string"
+        ? parsed.metadata.organisation
+        : undefined;
+
+    return {
+      metadata: { tier, status, project, organisation, raw: parsed.metadata },
+      warnings,
+    };
+  } catch {
+    return null;
   }
 }
 
 /**
- * Load and parse repository metadata from repo-metadata.yaml.
+ * Load and parse repository metadata from standards.toml [metadata] section.
+ *
  * Always returns an object with metadata and warnings fields.
- * - If file doesn't exist: { metadata: null, warnings: [] }
- * - If file is empty/invalid: { metadata: defaults, warnings: [...] }
+ * - If no metadata found: { metadata: null, warnings: [] }
  * - If file is valid: { metadata: parsed, warnings: [] }
  */
 export function getRepoMetadata(repoPath: string): {
   metadata: RepoMetadata | null;
   warnings: string[];
 } {
-  const metadataPath = findMetadataPath(repoPath);
-  if (!metadataPath) {
-    return { metadata: null, warnings: [] };
+  const tomlResult = extractMetadataFromToml(repoPath);
+  if (tomlResult) {
+    return tomlResult;
   }
-
-  try {
-    const content = readFileSync(metadataPath, "utf-8");
-    return parseRepoMetadata(content);
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return {
-      metadata: null,
-      warnings: [`Failed to read metadata file: ${msg}`],
-    };
-  }
+  return { metadata: null, warnings: [] };
 }
 
 /** Directories to skip during recursive search */
@@ -263,10 +263,11 @@ export function hasCheckToml(repoPath: string): boolean {
 }
 
 /**
- * Check if a repository has a repo-metadata.yaml file.
+ * Check if a repository has metadata in standards.toml [metadata].
  */
 export function hasMetadata(repoPath: string): boolean {
-  return findMetadataPath(repoPath) !== null;
+  const tomlResult = extractMetadataFromToml(repoPath);
+  return tomlResult !== null;
 }
 
 /** Determine if a repository is scannable (has metadata and valid standards.toml). */

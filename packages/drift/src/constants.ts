@@ -61,9 +61,7 @@ export const DEFAULTS = {
 export const FILE_PATTERNS = {
   /** Config file names in order of precedence */
   config: ["drift.config.yaml", "drift.config.yml", "drift.yaml"] as const,
-  /** Metadata file names in order of precedence */
-  metadata: ["repo-metadata.yaml", "repo-metadata.yml"] as const,
-  /** @standards-kit/conform config file name */
+  /** @standards-kit/conform config file name (contains [metadata] for tier/project/organisation/status) */
   checkToml: "standards.toml" as const,
 } as const;
 

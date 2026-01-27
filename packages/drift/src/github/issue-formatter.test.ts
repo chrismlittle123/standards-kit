@@ -188,7 +188,7 @@ describe("issue-formatter", () => {
       expect(body).toContain(
         "Update `standards.toml` to use a ruleset matching `*-production`"
       );
-      expect(body).toContain("update `repo-metadata.yaml` tier");
+      expect(body).toContain("`standards.toml` `[metadata].tier`");
     });
   });
 
