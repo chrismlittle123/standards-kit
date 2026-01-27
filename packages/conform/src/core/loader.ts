@@ -6,6 +6,28 @@ import TOML from "@iarna/toml";
 import { resolveExtends } from "./registry.js";
 import { type Config, configSchema, defaultConfig } from "./schema.js";
 
+/**
+ * Recursively strip Symbol properties from an object.
+ * @iarna/toml adds Symbol properties to inline tables (e.g., Symbol('type')),
+ * which causes Zod 4.x validation to fail with "Cannot convert a Symbol value to a string"
+ * when validating z.record() schemas.
+ */
+function stripSymbols(obj: unknown): unknown {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(stripSymbols);
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(obj as object)) {
+    result[key] = stripSymbols((obj as Record<string, unknown>)[key]);
+  }
+  return result;
+}
+
 /** Config file name */
 export const CONFIG_FILE_NAME = "standards.toml";
 
@@ -91,7 +113,9 @@ function resolveConfigPath(configPath?: string): string {
 function parseTomlFile(filePath: string): unknown {
   try {
     const content = fs.readFileSync(filePath, "utf-8");
-    return TOML.parse(content);
+    // Strip Symbol properties that @iarna/toml adds to inline tables
+    // to prevent Zod 4.x validation errors
+    return stripSymbols(TOML.parse(content));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     throw new ConfigError(`Failed to parse ${CONFIG_FILE_NAME}: ${message}`);

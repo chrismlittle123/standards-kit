@@ -1,4 +1,3 @@
- 
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -9,6 +8,28 @@ import { execa } from "execa";
 import { CACHE, TIMEOUTS } from "../constants.js";
 import { ConfigError } from "./loader.js";
 import { type Config, configSchema } from "./schema.js";
+
+/**
+ * Recursively strip Symbol properties from an object.
+ * @iarna/toml adds Symbol properties to inline tables (e.g., Symbol('type')),
+ * which causes Zod 4.x validation to fail with "Cannot convert a Symbol value to a string"
+ * when validating z.record() schemas.
+ */
+function stripSymbols(obj: unknown): unknown {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(stripSymbols);
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(obj as object)) {
+    result[key] = stripSymbols((obj as Record<string, unknown>)[key]);
+  }
+  return result;
+}
 
 /** Authentication method for private registries */
 type AuthMethod = "token" | "ssh" | "none";
@@ -183,7 +204,9 @@ export function loadRuleset(registryDir: string, rulesetName: string): Config {
 
   let parsed: unknown;
   try {
-    parsed = toml.parse(content);
+    // Strip Symbol properties that @iarna/toml adds to inline tables
+    // to prevent Zod 4.x validation errors
+    parsed = stripSymbols(toml.parse(content));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new ConfigError(`Failed to parse ruleset ${rulesetName}: ${message}`);
