@@ -214,7 +214,7 @@ export function loadRuleset(registryDir: string, rulesetName: string): Config {
 
   const result = configSchema.safeParse(parsed);
   if (!result.success) {
-    const errors = result.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
+    const errors = result.error.issues.map((e) => `${e.path.map((p) => (typeof p === "symbol" ? (p.description ?? "[symbol]") : p)).join(".")}: ${e.message}`).join(", ");
     throw new ConfigError(`Invalid ruleset ${rulesetName}: ${errors}`);
   }
 
