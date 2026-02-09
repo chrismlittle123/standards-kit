@@ -129,7 +129,7 @@ function validateConfig(rawConfig: unknown): Config {
   const result = configSchema.safeParse(rawConfig);
   if (!result.success) {
     const errors = result.error.issues
-      .map((e) => `  - ${e.path.join(".")}: ${e.message}`)
+      .map((e) => `  - ${e.path.map((p) => (typeof p === "symbol" ? (p.description ?? "[symbol]") : p)).join(".")}: ${e.message}`)
       .join("\n");
     throw new ConfigError(`Invalid ${CONFIG_FILE_NAME} configuration:\n${errors}`);
   }
