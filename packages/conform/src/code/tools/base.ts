@@ -14,20 +14,29 @@ export abstract class BaseToolRunner implements IToolRunner {
   abstract readonly configFiles: string[];
 
   /**
-   * Check if any of the config files exist
+   * Check if any of the config files exist in projectRoot or parent directories.
+   * Most tools (ESLint, TSC, etc.) walk up directories to find configs.
    */
   protected hasConfig(projectRoot: string): boolean {
-    return this.configFiles.some((config) => fs.existsSync(path.join(projectRoot, config)));
+    return this.findConfig(projectRoot) !== null;
   }
 
   /**
-   * Find which config file exists (if any)
+   * Find which config file exists, searching projectRoot and parent directories.
+   * Returns the path relative to the directory where it was found, or null.
    */
   protected findConfig(projectRoot: string): string | null {
-    for (const config of this.configFiles) {
-      if (fs.existsSync(path.join(projectRoot, config))) {
-        return config;
+    let dir = path.resolve(projectRoot);
+    const root = path.parse(dir).root;
+
+    while (true) {
+      for (const config of this.configFiles) {
+        if (fs.existsSync(path.join(dir, config))) {
+          return dir === path.resolve(projectRoot) ? config : path.join(dir, config);
+        }
       }
+      if (dir === root) break;
+      dir = path.dirname(dir);
     }
     return null;
   }
