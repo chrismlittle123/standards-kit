@@ -1,5 +1,12 @@
 # @standards-kit/drift
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies
+  - @standards-kit/conform@0.3.2
+
 ## 0.1.6
 
 ### Patch Changes

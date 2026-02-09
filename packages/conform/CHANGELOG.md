@@ -1,5 +1,16 @@
 # @standards-kit/conform
 
+## 0.3.2
+
+### Patch Changes
+
+- Fix Symbol crash in validation error formatting when config has invalid ESLint rules
+
+  - Fix `Cannot convert a Symbol value to a string` crash when Zod validation errors contain Symbol path elements from `.catchall()` schemas
+  - Strip Symbol properties from TOML parser output for Zod 4.x compatibility
+  - Remove all references to legacy package names
+  - Add CI tooling and fix code quality violations
+
 ## 0.3.1
 
 ### Patch Changes
