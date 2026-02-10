@@ -335,4 +335,160 @@ describe("repo-checks", () => {
       );
     });
   });
+
+  describe("fileExists - network errors", () => {
+    it("returns false when fetchWithRetry throws a network error", async () => {
+      const { fileExists } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockRejectedValueOnce(new Error("Network timeout"));
+
+      const result = await fileExists(
+        "test-org",
+        "test-repo",
+        "some-file.txt"
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when fetchWithRetry throws retry exhaustion", async () => {
+      const { fileExists } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockRejectedValueOnce(
+        new Error("Max retries exceeded")
+      );
+
+      const result = await fileExists(
+        "test-org",
+        "test-repo",
+        "another-file.yaml"
+      );
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("hasRemoteInfraConfig", () => {
+    it("returns true when standards.toml has [infra] with enabled = true", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[infra]\nenabled = true', { status: 200 })
+      );
+
+      const result = await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(result).toBe(true);
+    });
+
+    it("returns false when standards.toml has [infra] with enabled = false", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[infra]\nenabled = false', { status: 200 })
+      );
+
+      const result = await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when standards.toml has no [infra] section", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[metadata]\ntier = "production"', { status: 200 })
+      );
+
+      const result = await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when standards.toml does not exist (404)", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response("Not Found", { status: 404 })
+      );
+
+      const result = await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false for invalid TOML content", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response("invalid toml {{{", { status: 200 })
+      );
+
+      const result = await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when fetchWithRetry throws a network error", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockRejectedValueOnce(new Error("Network error"));
+
+      const result = await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+
+    it("passes token to request headers", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[infra]\nenabled = true', { status: 200 })
+      );
+
+      await hasRemoteInfraConfig("test-org", "test-repo", "my-token");
+
+      expect(mockFetchWithRetry).toHaveBeenCalledWith(
+        expect.stringContaining("/repos/test-org/test-repo/contents/standards.toml"),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: "Bearer my-token",
+          }),
+        }),
+        "my-token"
+      );
+    });
+
+    it("requests raw content format", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[infra]\nenabled = true', { status: 200 })
+      );
+
+      await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(mockFetchWithRetry).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Accept: "application/vnd.github.raw+json",
+          }),
+        }),
+        undefined
+      );
+    });
+
+    it("returns false when [infra] section exists but has no enabled field", async () => {
+      const { hasRemoteInfraConfig } = await import("../../../src/github/repo-checks.js");
+
+      mockFetchWithRetry.mockResolvedValueOnce(
+        new Response('[infra]\nprovider = "aws"', { status: 200 })
+      );
+
+      const result = await hasRemoteInfraConfig("test-org", "test-repo");
+
+      expect(result).toBe(false);
+    });
+  });
 });
