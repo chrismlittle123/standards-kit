@@ -7,39 +7,65 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  standards:
+    name: Standards
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [22]
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          fetch-depth: 2
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
           cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build
 
-      - name: Type check
-        run: pnpm run typecheck
+      - name: Conform audit (root)
+        run: node packages/conform/dist/cli.js audit
 
-      - name: Lint
-        run: pnpm run lint
+      - name: Conform check (root)
+        run: node packages/conform/dist/cli.js check
+
+      - name: Conform audit (conform)
+        working-directory: packages/conform
+        run: node dist/cli.js audit
+
+      - name: Conform check (conform)
+        working-directory: packages/conform
+        run: node dist/cli.js check
+
+      - name: Conform audit (drift)
+        working-directory: packages/drift
+        run: node ../conform/dist/cli.js audit
+
+      - name: Conform check (drift)
+        working-directory: packages/drift
+        run: node ../conform/dist/cli.js check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
 
       - name: Test
         run: pnpm run test
-
-      - name: Check unused code
-        run: pnpm run knip
