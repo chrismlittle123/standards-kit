@@ -1,11 +1,10 @@
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  loadConfig,
   scanInfra,
   type InfraScanResult,
   type ScanInfraOptions,
 } from "@standards-kit/conform";
-import { parse as parseToml } from "smol-toml";
 import { version } from "../../version.js";
 import { actionsOutput, COLORS } from "../../utils/index.js";
 import {
@@ -118,26 +117,14 @@ function hasDrift(detection: InfraDriftDetection): boolean {
   return detection.summary.missing > 0 || detection.summary.errors > 0;
 }
 
-interface InfraConfig {
-  enabled?: boolean;
-  manifest?: string;
-}
-
 /**
- * Read the infra manifest path from standards.toml.
- * This is a workaround for a bug in @standards-kit/conform where mergeWithDefaults
- * drops the infra config.
+ * Read the infra manifest path from standards.toml via conform's config loader.
  */
 function getManifestPath(repoDir: string): string {
   const configPath = join(repoDir, "standards.toml");
-  const content = readFileSync(configPath, "utf-8");
-  const config = parseToml(content) as { infra?: InfraConfig };
+  const { config } = loadConfig(configPath);
 
-  if (!config.infra) {
-    throw new Error("No [infra] section found in standards.toml");
-  }
-
-  if (!config.infra.enabled) {
+  if (!config.infra?.enabled) {
     throw new Error("Infra scanning is not enabled in standards.toml");
   }
 
@@ -237,7 +224,7 @@ async function scanSingleRepo(
     }
     cloneRepo(owner, repoName, tempDir, token);
 
-    // Read manifest path from standards.toml (workaround for @standards-kit/conform bug)
+    // Read manifest path from standards.toml
     const manifestPath = getManifestPath(tempDir);
 
     // Call @standards-kit/conform's scanInfra with the manifest path
@@ -328,7 +315,7 @@ async function scanRepoForOrg(
   try {
     cloneRepo(owner, repoName, tempDir, token);
 
-    // Read manifest path from standards.toml (workaround for @standards-kit/conform bug)
+    // Read manifest path from standards.toml
     const manifestPath = getManifestPath(tempDir);
 
     const scanOptions: ScanInfraOptions = {

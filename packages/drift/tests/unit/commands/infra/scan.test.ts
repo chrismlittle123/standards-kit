@@ -1,16 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock external modules before imports
-vi.mock("node:fs", () => ({
-  readFileSync: vi.fn(),
-}));
-
 vi.mock("@standards-kit/conform", () => ({
+  loadConfig: vi.fn(),
   scanInfra: vi.fn(),
-}));
-
-vi.mock("smol-toml", () => ({
-  parse: vi.fn(),
 }));
 
 vi.mock("../../../../src/version.js", () => ({
@@ -59,10 +52,7 @@ vi.mock("../../../../src/constants.js", () => ({
   CONCURRENCY: { maxRepoScans: 5 },
 }));
 
-import { readFileSync } from "node:fs";
-import { scanInfra } from "@standards-kit/conform";
-import { parse as parseToml } from "smol-toml";
-import { actionsOutput } from "../../../../src/utils/index.js";
+import { loadConfig, scanInfra } from "@standards-kit/conform";
 import {
   createIssue,
   getGitHubToken,
@@ -74,9 +64,8 @@ import { discoverInfraRepos } from "../../../../src/github/infra-repo-discovery.
 import { scan } from "../../../../src/commands/infra/scan.js";
 
 describe("commands/infra/scan", () => {
-  const mockReadFileSync = vi.mocked(readFileSync);
+  const mockLoadConfig = vi.mocked(loadConfig);
   const mockScanInfra = vi.mocked(scanInfra);
-  const mockParseToml = vi.mocked(parseToml);
   const mockCreateIssue = vi.mocked(createIssue);
   const mockGetGitHubToken = vi.mocked(getGitHubToken);
   const mockCloneRepo = vi.mocked(cloneRepo);
@@ -85,6 +74,19 @@ describe("commands/infra/scan", () => {
   const mockDiscoverInfraRepos = vi.mocked(discoverInfraRepos);
 
   let mockExit: ReturnType<typeof vi.spyOn>;
+
+  /** Helper to mock loadConfig returning an enabled infra config */
+  function mockInfraConfig(manifest?: string) {
+    mockLoadConfig.mockReturnValue({
+      config: {
+        infra: {
+          enabled: true,
+          manifest: manifest ?? "infra-manifest.json",
+        },
+      },
+      configPath: "/tmp/drift-infra-test/standards.toml",
+    } as any);
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -147,10 +149,7 @@ describe("commands/infra/scan", () => {
 
   describe("single repo scanning", () => {
     it("scans a single repo and reports no drift", async () => {
-      mockReadFileSync.mockReturnValue("[infra]\nenabled = true");
-      mockParseToml.mockReturnValue({
-        infra: { enabled: true, manifest: "infra-manifest.json" },
-      });
+      mockInfraConfig();
       mockScanInfra.mockResolvedValueOnce({
         manifest: "/tmp/drift-infra-test/infra-manifest.json",
         summary: { total: 2, found: 2, missing: 0, errors: 0 },
@@ -191,10 +190,7 @@ describe("commands/infra/scan", () => {
     });
 
     it("creates an issue when drift is detected", async () => {
-      mockReadFileSync.mockReturnValue("[infra]\nenabled = true");
-      mockParseToml.mockReturnValue({
-        infra: { enabled: true },
-      });
+      mockInfraConfig();
       mockScanInfra.mockResolvedValueOnce({
         manifest: "/tmp/drift-infra-test/infra-manifest.json",
         summary: { total: 2, found: 1, missing: 1, errors: 0 },
@@ -239,10 +235,7 @@ describe("commands/infra/scan", () => {
     });
 
     it("does not create issue in dry-run mode", async () => {
-      mockReadFileSync.mockReturnValue("[infra]\nenabled = true");
-      mockParseToml.mockReturnValue({
-        infra: { enabled: true },
-      });
+      mockInfraConfig();
       mockScanInfra.mockResolvedValueOnce({
         manifest: "/tmp/drift-infra-test/infra-manifest.json",
         summary: { total: 1, found: 0, missing: 1, errors: 0 },
@@ -268,10 +261,7 @@ describe("commands/infra/scan", () => {
     });
 
     it("exits with error when drift has errors", async () => {
-      mockReadFileSync.mockReturnValue("[infra]\nenabled = true");
-      mockParseToml.mockReturnValue({
-        infra: { enabled: true },
-      });
+      mockInfraConfig();
       mockScanInfra.mockResolvedValueOnce({
         manifest: "/tmp/drift-infra-test/infra-manifest.json",
         summary: { total: 1, found: 0, missing: 0, errors: 1 },
@@ -302,7 +292,7 @@ describe("commands/infra/scan", () => {
     });
 
     it("cleans up temp dir even when scan throws", async () => {
-      mockReadFileSync.mockImplementation(() => {
+      mockLoadConfig.mockImplementation(() => {
         throw new Error("File not found");
       });
 
@@ -319,10 +309,7 @@ describe("commands/infra/scan", () => {
     });
 
     it("uses default manifest filename when not specified in config", async () => {
-      mockReadFileSync.mockReturnValue("[infra]\nenabled = true");
-      mockParseToml.mockReturnValue({
-        infra: { enabled: true },
-      });
+      mockInfraConfig();
       mockScanInfra.mockResolvedValueOnce({
         manifest: "/tmp/drift-infra-test/infra-manifest.json",
         summary: { total: 0, found: 0, missing: 0, errors: 0 },
@@ -363,10 +350,7 @@ describe("commands/infra/scan", () => {
         filteredByActivity: false,
       });
 
-      mockReadFileSync.mockReturnValue("[infra]\nenabled = true");
-      mockParseToml.mockReturnValue({
-        infra: { enabled: true },
-      });
+      mockInfraConfig();
       mockScanInfra.mockResolvedValueOnce({
         manifest: "/tmp/drift-infra-test/infra-manifest.json",
         summary: { total: 1, found: 1, missing: 0, errors: 0 },
@@ -431,10 +415,7 @@ describe("commands/infra/scan", () => {
         filteredByActivity: false,
       });
 
-      mockReadFileSync.mockReturnValue("[infra]\nenabled = true");
-      mockParseToml.mockReturnValue({
-        infra: { enabled: true },
-      });
+      mockInfraConfig();
       mockScanInfra.mockResolvedValueOnce({
         manifest: "/tmp/drift-infra-test/infra-manifest.json",
         summary: { total: 1, found: 0, missing: 1, errors: 0 },

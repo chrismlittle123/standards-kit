@@ -408,6 +408,15 @@ function mergeProcess(c: Config, dc: Config): ProcessConfig {
   };
 }
 
+type InfraConfig = NonNullable<Config["infra"]>;
+
+function mergeInfra(c: Config, dc: Config): InfraConfig {
+  return {
+    enabled: c.infra?.enabled ?? dc.infra?.enabled ?? false,
+    manifest: c.infra?.manifest ?? dc.infra?.manifest ?? "infra-manifest.json",
+  };
+}
+
 /**
  * Deep merge config with defaults
  */
@@ -415,10 +424,7 @@ function mergeWithDefaults(config: Config): Config {
   return {
     code: mergeCode(config, defaultConfig),
     process: mergeProcess(config, defaultConfig),
-    infra: {
-      enabled: config.infra?.enabled ?? defaultConfig.infra?.enabled ?? false,
-      manifest: config.infra?.manifest ?? defaultConfig.infra?.manifest ?? "infra-manifest.json",
-    },
+    infra: mergeInfra(config, defaultConfig),
     monorepo: config.monorepo,
   };
 }
