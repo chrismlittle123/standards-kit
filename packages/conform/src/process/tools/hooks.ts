@@ -8,6 +8,7 @@ interface HooksConfig {
   require_hooks?: string[];
   commands?: Record<string, string[]>;
   protected_branches?: string[];
+  templates?: Record<string, string>;
 }
 
 /**
@@ -110,6 +111,30 @@ export class HooksRunner extends BaseProcessToolRunner {
     );
   }
 
+  /** Check that hook files match expected template content */
+  private checkHookTemplates(projectRoot: string): Violation[] {
+    const templates = this.config.templates ?? {};
+    const violations: Violation[] = [];
+
+    for (const [hook, expectedContent] of Object.entries(templates)) {
+      const hookPath = `.husky/${hook}`;
+      const actual = this.readFile(projectRoot, hookPath);
+      if (actual === null) {
+        continue; // Skip if hook file doesn't exist (checkRequiredHooks handles that)
+      }
+      if (actual.trim() !== expectedContent.trim()) {
+        violations.push({
+          rule: `${this.rule}.${hook}.template`,
+          tool: this.toolId,
+          file: hookPath,
+          message: `Hook '${hook}' does not match expected template`,
+          severity: "error",
+        });
+      }
+    }
+    return violations;
+  }
+
   /** Check that pre-push hook prevents direct pushes to protected branches */
   private checkProtectedBranches(projectRoot: string): Violation[] {
     const protectedBranches = this.config.protected_branches ?? [];
@@ -164,6 +189,7 @@ export class HooksRunner extends BaseProcessToolRunner {
     const violations = [
       ...this.checkRequiredHooks(projectRoot),
       ...this.checkHookCommands(projectRoot),
+      ...this.checkHookTemplates(projectRoot),
       ...this.checkProtectedBranches(projectRoot),
     ];
 

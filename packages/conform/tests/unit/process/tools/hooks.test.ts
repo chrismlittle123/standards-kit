@@ -143,6 +143,65 @@ describe("HooksRunner", () => {
     });
   });
 
+  describe("templates", () => {
+    it("passes when hook content matches template exactly", async () => {
+      const content = "#!/bin/sh\npnpm lint-staged";
+      runner.setConfig({
+        enabled: true,
+        templates: { "pre-commit": content },
+      });
+      setupFs(
+        new Set(["/root/.husky"]),
+        new Map([["/root/.husky/pre-commit", content]])
+      );
+
+      const result = await runner.run("/root");
+      expect(result.passed).toBe(true);
+    });
+
+    it("passes when content matches after trimming whitespace", async () => {
+      runner.setConfig({
+        enabled: true,
+        templates: { "pre-commit": "  #!/bin/sh\npnpm lint-staged\n  " },
+      });
+      setupFs(
+        new Set(["/root/.husky"]),
+        new Map([["/root/.husky/pre-commit", "#!/bin/sh\npnpm lint-staged"]])
+      );
+
+      const result = await runner.run("/root");
+      expect(result.passed).toBe(true);
+    });
+
+    it("fails when hook content does not match template", async () => {
+      runner.setConfig({
+        enabled: true,
+        templates: { "pre-commit": "#!/bin/sh\npnpm lint-staged" },
+      });
+      setupFs(
+        new Set(["/root/.husky"]),
+        new Map([["/root/.husky/pre-commit", "#!/bin/sh\nnpm test"]])
+      );
+
+      const result = await runner.run("/root");
+      expect(result.passed).toBe(false);
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0].rule).toBe("process.hooks.pre-commit.template");
+      expect(result.violations[0].message).toContain("does not match expected template");
+    });
+
+    it("skips gracefully when hook file does not exist", async () => {
+      runner.setConfig({
+        enabled: true,
+        templates: { "pre-commit": "#!/bin/sh\npnpm lint-staged" },
+      });
+      setupFs(new Set(["/root/.husky"]), new Map());
+
+      const result = await runner.run("/root");
+      expect(result.passed).toBe(true);
+    });
+  });
+
   describe("protected_branches", () => {
     it("passes when pre-push hook checks protected branches", async () => {
       runner.setConfig({

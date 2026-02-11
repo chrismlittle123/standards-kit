@@ -252,6 +252,52 @@ describe("mergeConfigs", () => {
     expect(result.process?.hooks?.require_hooks).toEqual(["pre-commit"]);
   });
 
+  it("merges process hooks templates field", () => {
+    const base: Config = {
+      process: {
+        hooks: {
+          enabled: true,
+          require_husky: true,
+          templates: { "pre-commit": "#!/bin/sh\npnpm lint-staged" },
+        },
+      },
+    };
+    const override: Config = {
+      process: {
+        hooks: {
+          enabled: true,
+          require_husky: true,
+        },
+      },
+    };
+    const result = mergeConfigs(base, override);
+    // templates should come from base since override doesn't specify it
+    expect(result.process?.hooks?.templates).toEqual({ "pre-commit": "#!/bin/sh\npnpm lint-staged" });
+  });
+
+  it("override templates replaces base templates", () => {
+    const base: Config = {
+      process: {
+        hooks: {
+          enabled: true,
+          require_husky: true,
+          templates: { "pre-commit": "#!/bin/sh\nold-command" },
+        },
+      },
+    };
+    const override: Config = {
+      process: {
+        hooks: {
+          enabled: true,
+          require_husky: true,
+          templates: { "pre-commit": "#!/bin/sh\nnew-command" },
+        },
+      },
+    };
+    const result = mergeConfigs(base, override);
+    expect(result.process?.hooks?.templates).toEqual({ "pre-commit": "#!/bin/sh\nnew-command" });
+  });
+
   it("override infra section replaces entirely", () => {
     const base: Config = {
       infra: { enabled: false, manifest: "old.json" },

@@ -425,6 +425,7 @@ const hooksConfigSchema = z
     require_hooks: z.array(z.string()).optional(), // e.g., ["pre-commit", "pre-push"]
     commands: hookCommandsSchema, // e.g., { "pre-commit": ["lint-staged"] }
     protected_branches: z.array(z.string()).optional(), // e.g., ["main", "master"] - verify pre-push prevents direct pushes
+    templates: z.record(z.string(), z.string()).optional(), // Maps hook name → expected file content, e.g., { "pre-commit" = "pnpm lint-staged" }
   })
   .strict()
   .optional();

@@ -41,6 +41,7 @@ function createHooksRunner(config: Config): HooksRunner {
       require_hooks: hooksConfig.require_hooks,
       commands: hooksConfig.commands,
       protected_branches: hooksConfig.protected_branches,
+      templates: hooksConfig.templates,
     });
   }
   return runner;

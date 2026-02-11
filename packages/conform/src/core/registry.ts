@@ -338,6 +338,7 @@ function mergeHooksConfig(
     require_husky: override.require_husky,
     require_hooks: override.require_hooks ?? base?.require_hooks,
     commands: override.commands ?? base?.commands,
+    templates: override.templates ?? base?.templates,
   };
 }
 

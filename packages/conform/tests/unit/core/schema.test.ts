@@ -169,6 +169,22 @@ describe("configSchema", () => {
       expect(result.success).toBe(true);
     });
 
+    it("accepts process.hooks with templates field", () => {
+      const config = {
+        process: {
+          hooks: {
+            enabled: true,
+            templates: {
+              "pre-commit": "#!/bin/sh\npnpm lint-staged",
+              "pre-push": "#!/bin/sh\npnpm test",
+            },
+          },
+        },
+      };
+      const result = configSchema.safeParse(config);
+      expect(result.success).toBe(true);
+    });
+
     it("accepts process.ci configuration", () => {
       const config = {
         process: {
