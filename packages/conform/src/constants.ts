@@ -42,7 +42,7 @@ export const GITHUB_API = {
  */
 export const STANDARDS_REPO = {
   /** Default owner for standards repository (can be overridden via STANDARDS_REPO_OWNER env var) */
-  owner: process.env.STANDARDS_REPO_OWNER ?? "palindrom-ai",
+  owner: process.env.STANDARDS_REPO_OWNER ?? "progression-labs",
   /** Default repository name (can be overridden via STANDARDS_REPO_NAME env var) */
   repo: process.env.STANDARDS_REPO_NAME ?? "standards",
 } as const;
