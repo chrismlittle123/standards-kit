@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-dynamodb");
 
-import { DescribeTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";

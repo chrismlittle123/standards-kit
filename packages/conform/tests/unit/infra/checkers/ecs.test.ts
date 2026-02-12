@@ -1,9 +1,6 @@
 vi.mock("@aws-sdk/client-ecs");
 
 import {
-  DescribeClustersCommand,
-  DescribeServicesCommand,
-  DescribeTaskDefinitionCommand,
   ECSClient,
 } from "@aws-sdk/client-ecs";
 import { describe, it, expect, vi, beforeEach } from "vitest";

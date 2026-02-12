@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-cloudwatch-logs");
 
-import { CloudWatchLogsClient, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
+import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";

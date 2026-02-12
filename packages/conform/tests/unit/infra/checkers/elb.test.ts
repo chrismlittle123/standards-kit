@@ -1,9 +1,6 @@
 vi.mock("@aws-sdk/client-elastic-load-balancing-v2");
 
 import {
-  DescribeLoadBalancersCommand,
-  DescribeTargetGroupsCommand,
-  DescribeListenersCommand,
   ElasticLoadBalancingV2Client,
 } from "@aws-sdk/client-elastic-load-balancing-v2";
 import { describe, it, expect, vi, beforeEach } from "vitest";

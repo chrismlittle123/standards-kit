@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-s3");
 
-import { HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { S3Client } from "@aws-sdk/client-s3";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";

@@ -34,11 +34,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { runCodeChecks, auditCodeConfig } from "../../../src/code/index.js";
 import {
   ESLintRunner,
-  KnipRunner,
   RuffRunner,
-  TscRunner,
-  TyRunner,
-  VultureRunner,
 } from "../../../src/code/tools/index.js";
 import type { Config, CheckResult } from "../../../src/core/index.js";
 
@@ -74,7 +70,7 @@ beforeEach(() => vi.clearAllMocks());
 
 describe("runCodeChecks", () => {
   it("runs enabled tools and returns domain result", async () => {
-    const eslintInstance = mocked(ESLintRunner).mock.results[0]?.value
+    const _eslintInstance = mocked(ESLintRunner).mock.results[0]?.value
       ?? new (ESLintRunner as any)();
     // Clear to get a fresh instance
     mocked(ESLintRunner).mockClear();

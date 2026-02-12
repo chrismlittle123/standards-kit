@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-lambda");
 
-import { GetFunctionCommand, LambdaClient } from "@aws-sdk/client-lambda";
+import { LambdaClient } from "@aws-sdk/client-lambda";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";

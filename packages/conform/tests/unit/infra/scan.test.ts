@@ -347,7 +347,6 @@ describe("scanManifest", () => {
       mocked(isMultiAccountManifest).mockReturnValue(false);
       mocked(getAllResources).mockReturnValue(resources);
 
-      let callOrder = 0;
       mocked(isValidArn).mockReturnValue(true);
       mocked(parseArn).mockImplementation((arn) => ({
         service: "s3", region: "", account: "",
@@ -355,7 +354,6 @@ describe("scanManifest", () => {
       } as any));
       mocked(isSupportedService).mockReturnValue(true);
       const mockChecker = { check: vi.fn().mockImplementation((parsed: any) => {
-        callOrder++;
         return Promise.resolve({
           arn: `arn:aws:s3:::${parsed.resourceId}`,
           exists: true, service: "s3",

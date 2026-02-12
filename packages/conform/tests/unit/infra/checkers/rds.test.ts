@@ -1,9 +1,6 @@
 vi.mock("@aws-sdk/client-rds");
 
 import {
-  DescribeDBInstancesCommand,
-  DescribeDBClustersCommand,
-  DescribeDBSubnetGroupsCommand,
   RDSClient,
 } from "@aws-sdk/client-rds";
 import { describe, it, expect, vi, beforeEach } from "vitest";

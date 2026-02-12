@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-secrets-manager");
 
-import { DescribeSecretCommand, SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
+import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";

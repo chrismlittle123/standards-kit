@@ -40,7 +40,7 @@ vi.mock("../../../src/infra/generate.js", () => ({
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { scanInfra, runInfraScan } from "../../../src/infra/index.js";
-import { readManifest, ManifestError } from "../../../src/infra/manifest.js";
+import { readManifest } from "../../../src/infra/manifest.js";
 import { scanManifest } from "../../../src/infra/scan.js";
 import { formatScan } from "../../../src/infra/output.js";
 import { loadConfigAsync, getProjectRoot } from "../../../src/core/index.js";
@@ -121,12 +121,10 @@ describe("scanInfra", () => {
 describe("runInfraScan", () => {
   let exitSpy: ReturnType<typeof vi.spyOn>;
   let stdoutSpy: ReturnType<typeof vi.spyOn>;
-  let stderrSpy: ReturnType<typeof vi.spyOn>;
-
   beforeEach(() => {
     exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
     stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    stderrSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   it("outputs formatted result and exits 0 on success", async () => {

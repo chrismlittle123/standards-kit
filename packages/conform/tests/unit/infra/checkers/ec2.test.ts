@@ -1,9 +1,6 @@
 vi.mock("@aws-sdk/client-ec2");
 
 import {
-  DescribeInstancesCommand,
-  DescribeSecurityGroupsCommand,
-  DescribeKeyPairsCommand,
   EC2Client,
 } from "@aws-sdk/client-ec2";
 import { describe, it, expect, vi, beforeEach } from "vitest";

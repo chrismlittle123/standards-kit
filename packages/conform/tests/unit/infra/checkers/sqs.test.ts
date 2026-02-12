@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-sqs");
 
-import { GetQueueAttributesCommand, GetQueueUrlCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { SQSClient } from "@aws-sdk/client-sqs";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";

@@ -1,9 +1,6 @@
 vi.mock("@aws-sdk/client-elasticache");
 
 import {
-  DescribeCacheClustersCommand,
-  DescribeCacheSubnetGroupsCommand,
-  DescribeReplicationGroupsCommand,
   ElastiCacheClient,
 } from "@aws-sdk/client-elasticache";
 import { describe, it, expect, vi, beforeEach } from "vitest";

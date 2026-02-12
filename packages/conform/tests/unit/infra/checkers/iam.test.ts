@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-iam");
 
-import { GetPolicyCommand, GetRoleCommand, IAMClient } from "@aws-sdk/client-iam";
+import { IAMClient } from "@aws-sdk/client-iam";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";

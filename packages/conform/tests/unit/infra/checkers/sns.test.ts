@@ -1,6 +1,6 @@
 vi.mock("@aws-sdk/client-sns");
 
-import { GetTopicAttributesCommand, SNSClient } from "@aws-sdk/client-sns";
+import { SNSClient } from "@aws-sdk/client-sns";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { ParsedArn } from "../../../../src/infra/types.js";
