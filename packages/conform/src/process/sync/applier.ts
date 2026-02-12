@@ -145,15 +145,11 @@ function buildPullRequestRule(
   return {
     type: "pull_request",
     parameters: {
-      ...(desired.required_reviews !== undefined && {
-        required_approving_review_count: desired.required_reviews,
-      }),
-      ...(desired.dismiss_stale_reviews !== undefined && {
-        dismiss_stale_reviews_on_push: desired.dismiss_stale_reviews,
-      }),
-      ...(desired.require_code_owner_reviews !== undefined && {
-        require_code_owner_review: desired.require_code_owner_reviews,
-      }),
+      required_approving_review_count: desired.required_reviews ?? 0,
+      dismiss_stale_reviews_on_push: desired.dismiss_stale_reviews ?? false,
+      require_code_owner_review: desired.require_code_owner_reviews ?? false,
+      require_last_push_approval: false,
+      required_review_thread_resolution: false,
     },
   };
 }
