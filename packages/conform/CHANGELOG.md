@@ -1,5 +1,21 @@
 # @standards-kit/conform
 
+## 0.4.0
+
+### Minor Changes
+
+- Add hook template validation, fix monorepo tool config resolution, and rebrand to Progression Labs
+
+  - feat: add hook template validation to conform
+  - fix: extract mergeInfra function and remove drift workaround
+  - fix: search parent directories for tool config files in monorepos
+  - fix: handle Symbol path elements in ruleset validation error formatting
+  - fix: standards registry URL to point to correct GitHub org
+  - fix: ESLint config for test files (disable no-explicit-any, remove unused imports)
+  - ci: replace individual lint/typecheck/knip steps with conform audit + check
+  - test: raise unit test coverage to 80%+ for conform and drift
+  - Rebrand Palindrom to Progression Labs
+
 ## 0.3.2
 
 ### Patch Changes
