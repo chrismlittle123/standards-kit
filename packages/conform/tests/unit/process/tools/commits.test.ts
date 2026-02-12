@@ -22,6 +22,24 @@ describe("CommitsRunner", () => {
     expect(runner.toolId).toBe("commits");
   });
 
+  describe("auto-generated commits", () => {
+    it.each([
+      ["Merge pull request #1 from owner/branch", "merge"],
+      ["Merge branch 'feature' into main", "merge"],
+      ["Revert \"feat: add feature\"", "revert"],
+      ["fixup! feat: add feature", "fixup"],
+      ["squash! feat: add feature", "squash"],
+      ["amend! feat: add feature", "amend"],
+    ])("skips auto-generated commit: %s (%s)", async (subject) => {
+      runner.setConfig({ enabled: true, types: ["feat", "fix"] });
+      mockedExeca.mockResolvedValue({ stdout: subject } as never);
+
+      const result = await runner.run("/root");
+      expect(result.skipped).toBe(true);
+      expect(result.skipReason).toContain("Auto-generated commit message");
+    });
+  });
+
   describe("skip cases", () => {
     it("skips when no pattern or types configured", async () => {
       runner.setConfig({ enabled: true });

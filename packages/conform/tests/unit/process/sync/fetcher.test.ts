@@ -19,6 +19,22 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+/** Helper: mock list endpoint returning summaries, then individual fetch returning full details */
+function mockListThenFetch(
+  summaries: { id: number; name: string; target: string; enforcement: string }[],
+  fullDetails: Record<number, Record<string, unknown>>
+): void {
+  mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(summaries) } as never);
+  // For each candidate that gets fetched individually, queue a response
+  for (const summary of summaries) {
+    if (fullDetails[summary.id]) {
+      mockedExeca.mockResolvedValueOnce({
+        stdout: JSON.stringify(fullDetails[summary.id]),
+      } as never);
+    }
+  }
+}
+
 describe("isGhAvailable", () => {
   it("returns true when gh is installed", async () => {
     mockedExeca.mockResolvedValueOnce({ stdout: "gh version 2.0.0" } as never);
@@ -68,35 +84,36 @@ describe("fetchBranchProtection", () => {
   });
 
   it("parses branch protection settings from active ruleset", async () => {
-    const rulesets = [
-      {
-        id: 1,
-        name: "Branch Protection",
-        target: "branch",
-        enforcement: "active",
-        conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
-        bypass_actors: [],
-        rules: [
-          {
-            type: "pull_request",
-            parameters: {
-              required_approving_review_count: 2,
-              dismiss_stale_reviews_on_push: true,
-              require_code_owner_review: true,
-            },
+    const fullRuleset = {
+      id: 1,
+      name: "Branch Protection",
+      target: "branch",
+      enforcement: "active",
+      conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
+      bypass_actors: [],
+      rules: [
+        {
+          type: "pull_request",
+          parameters: {
+            required_approving_review_count: 2,
+            dismiss_stale_reviews_on_push: true,
+            require_code_owner_review: true,
           },
-          {
-            type: "required_status_checks",
-            parameters: {
-              required_status_checks: [{ context: "ci/build" }],
-              strict_required_status_checks_policy: true,
-            },
+        },
+        {
+          type: "required_status_checks",
+          parameters: {
+            required_status_checks: [{ context: "ci/build" }],
+            strict_required_status_checks_policy: true,
           },
-          { type: "required_signatures" },
-        ],
-      },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+        },
+        { type: "required_signatures" },
+      ],
+    };
+    mockListThenFetch(
+      [{ id: 1, name: "Branch Protection", target: "branch", enforcement: "active" }],
+      { 1: fullRuleset }
+    );
     const result = await fetchBranchProtection(repoInfo, "main");
     expect(result.branch).toBe("main");
     expect(result.requiredReviews).toBe(2);
@@ -110,20 +127,21 @@ describe("fetchBranchProtection", () => {
   });
 
   it("parses bypass actors and sets enforceAdmins to false", async () => {
-    const rulesets = [
-      {
-        id: 1,
-        name: "BP",
-        target: "branch",
-        enforcement: "active",
-        conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
-        bypass_actors: [
-          { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" },
-        ],
-        rules: [],
-      },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+    const fullRuleset = {
+      id: 1,
+      name: "BP",
+      target: "branch",
+      enforcement: "active",
+      conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
+      bypass_actors: [
+        { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "always" },
+      ],
+      rules: [],
+    };
+    mockListThenFetch(
+      [{ id: 1, name: "BP", target: "branch", enforcement: "active" }],
+      { 1: fullRuleset }
+    );
     const result = await fetchBranchProtection(repoInfo, "main");
     expect(result.enforceAdmins).toBe(false);
     expect(result.bypassActors).toEqual([
@@ -161,87 +179,134 @@ describe("fetchBranchProtection", () => {
   });
 
   it("matches ~DEFAULT_BRANCH to main", async () => {
-    const rulesets = [
-      {
-        id: 1,
-        name: "BP",
-        target: "branch",
-        enforcement: "active",
-        conditions: { ref_name: { include: ["~DEFAULT_BRANCH"], exclude: [] } },
-        rules: [],
-      },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+    const fullRuleset = {
+      id: 1,
+      name: "BP",
+      target: "branch",
+      enforcement: "active",
+      conditions: { ref_name: { include: ["~DEFAULT_BRANCH"], exclude: [] } },
+      rules: [],
+    };
+    mockListThenFetch(
+      [{ id: 1, name: "BP", target: "branch", enforcement: "active" }],
+      { 1: fullRuleset }
+    );
     const result = await fetchBranchProtection(repoInfo, "main");
     expect(result.rulesetId).toBe(1);
   });
 
   it("matches ~ALL pattern to any branch", async () => {
-    const rulesets = [
-      {
-        id: 1,
-        name: "BP",
-        target: "branch",
-        enforcement: "active",
-        conditions: { ref_name: { include: ["~ALL"], exclude: [] } },
-        rules: [],
-      },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+    const fullRuleset = {
+      id: 1,
+      name: "BP",
+      target: "branch",
+      enforcement: "active",
+      conditions: { ref_name: { include: ["~ALL"], exclude: [] } },
+      rules: [],
+    };
+    mockListThenFetch(
+      [{ id: 1, name: "BP", target: "branch", enforcement: "active" }],
+      { 1: fullRuleset }
+    );
     const result = await fetchBranchProtection(repoInfo, "develop");
     expect(result.rulesetId).toBe(1);
   });
 
   it("matches wildcard patterns", async () => {
-    const rulesets = [
-      {
-        id: 1,
-        name: "BP",
-        target: "branch",
-        enforcement: "active",
-        conditions: { ref_name: { include: ["release/*"], exclude: [] } },
-        rules: [],
-      },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+    const fullRuleset = {
+      id: 1,
+      name: "BP",
+      target: "branch",
+      enforcement: "active",
+      conditions: { ref_name: { include: ["release/*"], exclude: [] } },
+      rules: [],
+    };
+    mockListThenFetch(
+      [{ id: 1, name: "BP", target: "branch", enforcement: "active" }],
+      { 1: fullRuleset }
+    );
     const result = await fetchBranchProtection(repoInfo, "release/v1.0");
     expect(result.rulesetId).toBe(1);
   });
 
   it("ignores inactive rulesets", async () => {
-    const rulesets = [
-      {
-        id: 1,
-        name: "BP",
-        target: "branch",
-        enforcement: "disabled",
-        conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
-        rules: [],
-      },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+    // Disabled rulesets are filtered before individual fetch, so only the list call happens
+    mockedExeca.mockResolvedValueOnce({
+      stdout: JSON.stringify([
+        { id: 1, name: "BP", target: "branch", enforcement: "disabled" },
+      ]),
+    } as never);
     const result = await fetchBranchProtection(repoInfo, "main");
     expect(result.rulesetId).toBeNull();
   });
 
   it("handles bypass_actors with null actor_id", async () => {
-    const rulesets = [
-      {
-        id: 1,
-        name: "BP",
-        target: "branch",
-        enforcement: "active",
-        conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
-        bypass_actors: [
-          { actor_id: null, actor_type: "OrganizationAdmin", bypass_mode: "always" },
-        ],
-        rules: [],
-      },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+    const fullRuleset = {
+      id: 1,
+      name: "BP",
+      target: "branch",
+      enforcement: "active",
+      conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
+      bypass_actors: [
+        { actor_id: null, actor_type: "OrganizationAdmin", bypass_mode: "always" },
+      ],
+      rules: [],
+    };
+    mockListThenFetch(
+      [{ id: 1, name: "BP", target: "branch", enforcement: "active" }],
+      { 1: fullRuleset }
+    );
     const result = await fetchBranchProtection(repoInfo, "main");
     expect(result.bypassActors).toEqual([
       { actor_type: "OrganizationAdmin", actor_id: undefined, bypass_mode: "always" },
+    ]);
+  });
+
+  it("falls back to summary when individual fetch fails", async () => {
+    // List returns a candidate, but individual fetch fails
+    mockedExeca.mockResolvedValueOnce({
+      stdout: JSON.stringify([
+        { id: 1, name: "BP", target: "branch", enforcement: "active" },
+      ]),
+    } as never);
+    mockedExeca.mockRejectedValueOnce(new Error("timeout"));
+    // Falls back to summary (no conditions), so no match found
+    const result = await fetchBranchProtection(repoInfo, "main");
+    expect(result.rulesetId).toBeNull();
+  });
+
+  it("fetches individual rulesets to get conditions and rules", async () => {
+    // List returns summary without conditions/rules (like real GitHub API)
+    mockListThenFetch(
+      [{ id: 42, name: "Branch Protection", target: "branch", enforcement: "active" }],
+      {
+        42: {
+          id: 42,
+          name: "Branch Protection",
+          target: "branch",
+          enforcement: "active",
+          conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
+          rules: [
+            {
+              type: "pull_request",
+              parameters: { required_approving_review_count: 0 },
+            },
+          ],
+        },
+      }
+    );
+    const result = await fetchBranchProtection(repoInfo, "main");
+    expect(result.rulesetId).toBe(42);
+    expect(result.requiredReviews).toBe(0);
+    // Verify both list and individual fetch were called
+    expect(mockedExeca).toHaveBeenCalledTimes(2);
+    expect(mockedExeca).toHaveBeenCalledWith("gh", [
+      "api",
+      "repos/acme/app/rulesets",
+    ]);
+    expect(mockedExeca).toHaveBeenCalledWith("gh", [
+      "api",
+      "repos/acme/app/rulesets/42",
     ]);
   });
 });
@@ -259,19 +324,20 @@ describe("fetchTagProtection", () => {
   });
 
   it("parses tag protection settings", async () => {
-    const rulesets = [
-      {
-        id: 2,
-        name: "Tag Protection",
-        target: "tag",
-        enforcement: "active",
-        conditions: {
-          ref_name: { include: ["refs/tags/v*"], exclude: [] },
-        },
-        rules: [{ type: "deletion" }, { type: "update" }],
+    const fullRuleset = {
+      id: 2,
+      name: "Tag Protection",
+      target: "tag",
+      enforcement: "active",
+      conditions: {
+        ref_name: { include: ["refs/tags/v*"], exclude: [] },
       },
-    ];
-    mockedExeca.mockResolvedValueOnce({ stdout: JSON.stringify(rulesets) } as never);
+      rules: [{ type: "deletion" }, { type: "update" }],
+    };
+    mockListThenFetch(
+      [{ id: 2, name: "Tag Protection", target: "tag", enforcement: "active" }],
+      { 2: fullRuleset }
+    );
     const result = await fetchTagProtection(repoInfo);
     expect(result.patterns).toEqual(["v*"]);
     expect(result.preventDeletion).toBe(true);
@@ -293,5 +359,28 @@ describe("fetchTagProtection", () => {
   it("throws FetcherError on generic error", async () => {
     mockedExeca.mockRejectedValueOnce(new Error("timeout"));
     await expect(fetchTagProtection(repoInfo)).rejects.toThrow(FetcherError);
+  });
+
+  it("fetches individual tag rulesets for full details", async () => {
+    const fullRuleset = {
+      id: 5,
+      name: "Tag Protection",
+      target: "tag",
+      enforcement: "active",
+      conditions: { ref_name: { include: ["refs/tags/v*"], exclude: [] } },
+      rules: [{ type: "deletion" }],
+    };
+    mockListThenFetch(
+      [{ id: 5, name: "Tag Protection", target: "tag", enforcement: "active" }],
+      { 5: fullRuleset }
+    );
+    const result = await fetchTagProtection(repoInfo);
+    expect(result.rulesetId).toBe(5);
+    expect(result.preventDeletion).toBe(true);
+    expect(mockedExeca).toHaveBeenCalledTimes(2);
+    expect(mockedExeca).toHaveBeenCalledWith("gh", [
+      "api",
+      "repos/acme/app/rulesets/5",
+    ]);
   });
 });
