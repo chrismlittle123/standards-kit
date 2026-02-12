@@ -3,6 +3,9 @@ import { execa } from "execa";
 import { type CheckResult, type Violation } from "../../core/index.js";
 import { BaseProcessToolRunner } from "./base.js";
 
+/** Patterns that indicate auto-generated commits that should be skipped */
+const AUTO_COMMIT_PATTERNS = [/^Merge /, /^Revert /, /^fixup! /, /^squash! /, /^amend! /];
+
 /** Commits configuration from standards.toml */
 interface CommitsConfig {
   enabled?: boolean;
@@ -150,6 +153,10 @@ export class CommitsRunner extends BaseProcessToolRunner {
     const subject = await this.getHeadCommitSubject(projectRoot);
     if (!subject) {
       return this.skip("Not in a git repository or no commits", elapsed());
+    }
+
+    if (AUTO_COMMIT_PATTERNS.some((pattern) => pattern.test(subject))) {
+      return this.skip("Auto-generated commit message", elapsed());
     }
 
     return this.validateCommitFormat(subject, configCheck.pattern as string, elapsed);

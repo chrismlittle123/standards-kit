@@ -43,6 +43,15 @@ export async function getRepoInfo(projectRoot: string): Promise<RepoInfo> {
   }
 }
 
+/** Fetch full details for a single ruleset by ID */
+async function fetchRulesetById(repoInfo: RepoInfo, rulesetId: number): Promise<GitHubRuleset> {
+  const result = await execa("gh", [
+    "api",
+    `repos/${repoInfo.owner}/${repoInfo.repo}/rulesets/${rulesetId}`,
+  ]);
+  return JSON.parse(result.stdout) as GitHubRuleset;
+}
+
 /** Fetch current branch protection settings from GitHub Rulesets */
 export async function fetchBranchProtection(
   repoInfo: RepoInfo,
@@ -51,7 +60,24 @@ export async function fetchBranchProtection(
   try {
     const result = await execa("gh", ["api", `repos/${repoInfo.owner}/${repoInfo.repo}/rulesets`]);
 
-    const rulesets = JSON.parse(result.stdout) as GitHubRuleset[];
+    const summaries = JSON.parse(result.stdout) as GitHubRuleset[];
+
+    // The list endpoint omits conditions/rules, so fetch full details
+    // for candidate branch rulesets
+    const candidates = summaries.filter(
+      (r) => r.target === "branch" && r.enforcement === "active"
+    );
+
+    const rulesets: GitHubRuleset[] = [];
+    for (const candidate of candidates) {
+      try {
+        rulesets.push(await fetchRulesetById(repoInfo, candidate.id));
+      } catch {
+        // If we can't fetch details, use the summary (may lack conditions/rules)
+        rulesets.push(candidate);
+      }
+    }
+
     return parseBranchRuleset(rulesets, branch);
   } catch (error) {
     return handleBranchFetchError(error, branch);
@@ -182,7 +208,23 @@ export async function fetchTagProtection(repoInfo: RepoInfo): Promise<TagProtect
   try {
     const result = await execa("gh", ["api", `repos/${repoInfo.owner}/${repoInfo.repo}/rulesets`]);
 
-    const rulesets = JSON.parse(result.stdout) as GitHubRuleset[];
+    const summaries = JSON.parse(result.stdout) as GitHubRuleset[];
+
+    // The list endpoint omits conditions/rules, so fetch full details
+    // for candidate tag rulesets
+    const candidates = summaries.filter(
+      (r) => r.target === "tag" && r.name === "Tag Protection"
+    );
+
+    const rulesets: GitHubRuleset[] = [];
+    for (const candidate of candidates) {
+      try {
+        rulesets.push(await fetchRulesetById(repoInfo, candidate.id));
+      } catch {
+        rulesets.push(candidate);
+      }
+    }
+
     return parseTagRuleset(rulesets);
   } catch (error) {
     return handleTagFetchError(error);
