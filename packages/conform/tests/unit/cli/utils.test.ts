@@ -31,7 +31,7 @@ import { runCodeChecks, auditCodeConfig } from "../../../src/code/index.js";
 import { runProcessChecks, auditProcessConfig } from "../../../src/process/index.js";
 import { ConfigError, loadConfigAsync } from "../../../src/core/index.js";
 import { formatOutput } from "../../../src/output/index.js";
-import type { DomainResult } from "../../../src/core/index.js";
+import type { Config, DomainResult } from "../../../src/core/index.js";
 
 const mocked = vi.mocked;
 
@@ -87,7 +87,7 @@ describe("handleError", () => {
 describe("runCheck", () => {
   it("runs both code and process checks when no domain filter", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(runCodeChecks).mockResolvedValue(makeDomainResult({ domain: "code" }));
@@ -103,7 +103,7 @@ describe("runCheck", () => {
 
   it("only runs code checks when domain filter is code", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(runCodeChecks).mockResolvedValue(makeDomainResult({ domain: "code" }));
@@ -116,7 +116,7 @@ describe("runCheck", () => {
 
   it("only runs process checks when domain filter is process", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(runProcessChecks).mockResolvedValue(makeDomainResult({ domain: "process" }));
@@ -129,7 +129,7 @@ describe("runCheck", () => {
 
   it("exits with VIOLATIONS_FOUND when violations exist", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(runCodeChecks).mockResolvedValue(
@@ -144,7 +144,7 @@ describe("runCheck", () => {
 
   it("passes config path option to loadConfigAsync", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/custom/standards.toml",
     });
     mocked(runCodeChecks).mockResolvedValue(makeDomainResult());
@@ -165,7 +165,7 @@ describe("runCheck", () => {
 
   it("writes formatted output to stdout", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/p/standards.toml",
     });
     mocked(runCodeChecks).mockResolvedValue(makeDomainResult());
@@ -181,7 +181,7 @@ describe("runCheck", () => {
 describe("runAudit", () => {
   it("calls audit functions instead of check functions", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(auditCodeConfig).mockResolvedValue(makeDomainResult({ domain: "code" }));
@@ -197,7 +197,7 @@ describe("runAudit", () => {
 
   it("only runs code audit when domain filter is code", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(auditCodeConfig).mockResolvedValue(makeDomainResult({ domain: "code" }));
@@ -210,7 +210,7 @@ describe("runAudit", () => {
 
   it("only runs process audit when domain filter is process", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(auditProcessConfig).mockResolvedValue(makeDomainResult({ domain: "process" }));
@@ -223,7 +223,7 @@ describe("runAudit", () => {
 
   it("exits with VIOLATIONS_FOUND when violations exist", async () => {
     mocked(loadConfigAsync).mockResolvedValue({
-      config: {} as any,
+      config: {} as Config,
       configPath: "/project/standards.toml",
     });
     mocked(auditCodeConfig).mockResolvedValue(
